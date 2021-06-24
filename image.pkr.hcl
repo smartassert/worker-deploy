@@ -27,8 +27,8 @@ build {
   }
 
   provisioner "file" {
-    destination = "~/.docker-compose.env"
-    source      = ".docker-compose.env"
+    destination = "~/.env"
+    source      = ".env"
   }
 
   provisioner "shell" {

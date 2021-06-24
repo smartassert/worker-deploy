@@ -3,8 +3,8 @@
 INITIAL_DIRECTORY=$PWD
 
 # Setup
-sudo docker-compose --env-file .docker-compose.env -f docker-compose.yml -f self-test/services.yml build
-sudo docker-compose --env-file .docker-compose.env -f docker-compose.yml -f self-test/services.yml up -d
+sudo docker-compose -f docker-compose.yml -f self-test/services.yml build
+sudo docker-compose -f docker-compose.yml -f self-test/services.yml up -d
 
 cd ./self-test/app || exit
 
@@ -45,9 +45,9 @@ fi
 
 ## Teardown
 cd "$INITIAL_DIRECTORY" || exit
-sudo docker-compose --env-file .docker-compose.env -f docker-compose.yml -f self-test/services.yml stop http-fixtures
-sudo docker-compose --env-file .docker-compose.env -f docker-compose.yml -f self-test/services.yml stop callback-receiver
-sudo docker-compose --env-file .docker-compose.env up -d --remove-orphans
+sudo docker-compose -f docker-compose.yml -f self-test/services.yml stop http-fixtures
+sudo docker-compose -f docker-compose.yml -f self-test/services.yml stop callback-receiver
+sudo docker-compose up -d --remove-orphans
 
 DB_TABLES=(
   "job"
@@ -60,7 +60,7 @@ DB_TABLES=(
 for TABLE in ${DB_TABLES[*]}
   do
     echo "Removing all from $TABLE"
-    sudo docker-compose --env-file .docker-compose.env exec -T -e PGPASSWORD=password! postgres psql -U postgres -d worker-db -c "DELETE FROM ${TABLE}"
+    sudo docker-compose exec -T -e PGPASSWORD=password! postgres psql -U postgres -d worker-db -c "DELETE FROM ${TABLE}"
   done
 
 sudo apt-get -qq -y remove php7.4-cli php7.4-curl php7.4-dom php7.4-mbstring zip > /dev/null

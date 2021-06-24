@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
     basil_worker.vm.network "forwarded_port", guest: 80, host: host_port
 
     # Copy system files and provision for use
-    basil_worker.vm.provision "file", source: "./.docker-compose.env", destination: "~/.docker-compose.env"
+    basil_worker.vm.provision "file", source: "./.env", destination: "~/.env"
     basil_worker.vm.provision "file", source: "./docker-compose.yml", destination: "~/docker-compose.yml"
     basil_worker.vm.provision "file", source: "./nginx/Dockerfile", destination: "~/nginx/Dockerfile"
     basil_worker.vm.provision "file", source: "./nginx/site.conf", destination: "~/nginx/site.conf"
