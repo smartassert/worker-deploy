@@ -37,6 +37,6 @@ chown -R www-data:www-data /var/basil/tests
 mkdir -p /var/log
 chown -R www-data:www-data /var/log
 
-sudo LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" docker-compose --env-file .docker-compose.env up -d
-sudo docker-compose --env-file .docker-compose.env exec -T app-web php bin/console doctrine:database:create --if-not-exists
-sudo docker-compose --env-file .docker-compose.env exec -T app-web php bin/console doctrine:schema:update --force
+sudo LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" docker-compose up -d
+sudo docker-compose exec -T app-web php bin/console doctrine:database:create --if-not-exists
+sudo docker-compose exec -T app-web php bin/console doctrine:schema:update --force
