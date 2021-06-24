@@ -75,15 +75,14 @@ services:
       - /var/log/nginx:/var/log/nginx
 
   app-web:
-    build:
-      context: $APP_BUILD_CONTEXT
-      args:
-        DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/worker-db?serverVersion=12&charset=utf8
-        MESSENGER_TRANSPORT_DSN: doctrine://default
+    image: ghcr.io/smartassert/worker:0.4
     container_name: app-web
     restart: always
     networks:
       - primary
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/worker-db?serverVersion=12&charset=utf8
+      MESSENGER_TRANSPORT_DSN: doctrine://default
     depends_on:
       - compiler
       - delegator
