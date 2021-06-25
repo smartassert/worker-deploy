@@ -9,7 +9,7 @@ LOCAL_TARGET_PATH="/var/basil/tests"
 TEST_FILENAME="test-${BROWSER}.yml"
 
 sed "s/{{ BROWSER }}/${BROWSER}/g" ./self-test/fixtures/basil/test.yml | sudo tee "${LOCAL_SOURCE_PATH}/${TEST_FILENAME}"
-COMPILE_OUTPUT=$(sudo docker-compose --env-file .docker-compose.env exec -T compiler ./compiler --source=/app/source/"${TEST_FILENAME}" --target=/app/tests)
+COMPILE_OUTPUT=$(sudo docker-compose exec -T compiler ./compiler --source=/app/source/"${TEST_FILENAME}" --target=/app/tests)
 COMPILE_EXIT_CODE=$?
 if [ "${COMPILE_EXIT_CODE}" -ne 0 ]; then
     echo "${ICON_FAILED} compiler test failed"
@@ -22,7 +22,7 @@ COMPILED_TARGET=$(echo "${COMPILED_TARGET_LINE/target: /}" | xargs)
 
 docker run --name http-fixtures --network worker-network -p 8080:80 -v "${PWD}/self-test/fixtures/http":/usr/share/nginx/html:ro -d nginx:1.19
 
-sudo docker-compose --env-file .docker-compose.env exec -T delegator ./bin/delegator  --browser "${BROWSER}" "${COMPILED_TARGET}"
+sudo docker-compose exec -T delegator ./bin/delegator  --browser "${BROWSER}" "${COMPILED_TARGET}"
 DELEGATOR_EXIT_CODE=$?
 if [ "$DELEGATOR_EXIT_CODE" -ne 0 ]; then
     echo "${ICON_FAILED} ${BROWSER} delegator test failed"

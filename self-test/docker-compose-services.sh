@@ -12,10 +12,10 @@ Services=(
 
 for Service in ${Services[*]}
   do
-    if ! sudo docker-compose --env-file .docker-compose.env ps --services --filter "status=running" | grep "$Service"; then
+    if ! sudo docker-compose ps --services --filter "status=running" | grep "$Service"; then
         echo "$Service not ok"
-        docker-compose --env-file .docker-compose.env ps
-        docker-compose --env-file .docker-compose.env logs "$Service"
+        docker-compose ps
+        docker-compose logs "$Service"
         exit 1
     fi
   done
