@@ -1,0 +1,16 @@
+name: Repository Dispatch Listener
+
+on:
+  repository_dispatch:
+    types: [test]
+
+jobs:
+  build:
+    name: Test Workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
