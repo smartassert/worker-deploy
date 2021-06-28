@@ -60,6 +60,20 @@ jobs:
           echo steps.dependency-versions.outputs.DELEGATOR_VERSION ${{ steps.dependency-versions.outputs.DELEGATOR_VERSION }}
           echo steps.dependency-versions.outputs.WORKER_VERSION ${{ steps.dependency-versions.outputs.WORKER_VERSION }}
 
+      - name: Examine versions Two
+        env:
+          COMPILER_VERSION: ${{ steps.dependency-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.dependency-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.dependency-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.dependency-versions.outputs.WORKER_VERSION }}
+        run: |
+          echo COMPILER_VERSION $COMPILER_VERSION
+          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
+          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
+          echo DELEGATOR_VERSION $DELEGATOR_VERSION
+          echo WORKER_VERSION $WORKER_VERSION
+
       - name: Verify image configuration
         run: |
           packer validate \
