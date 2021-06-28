@@ -83,6 +83,28 @@ class ApplicationTest extends TestCase
     }
 
     /**
+     * @depends testAddSources
+     */
+    public function testWaitForApplicationComplete(): void
+    {
+        $duration = 0;
+        $interval = 1;
+        $timeout = 60;
+        $isComplete = false;
+
+        while ($duration < $timeout && false === $isComplete) {
+            $job = $this->getJobStatus();
+
+            $isComplete = 'complete' === $job['compilation_state'] && 'complete' === $job['execution_state'] && 'complete' === $job['callback_state'];
+            $duration = $duration + $interval;
+
+            sleep($interval);
+        }
+
+        self::assertTrue($isComplete);
+    }
+
+    /**
      * @return array<mixed>
      */
     private function getJobStatus(): array
