@@ -11,32 +11,11 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: macos-10.15
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Show package versions
-        run: |
-          vagrant --version
-          VBoxManage --version
-
-      - name: Cache multiple paths
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.vagrant.d/boxes/focal-server-cloudimg-amd64-vagrant
-          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
-
-      - name: Validate Vagrantfile
-        run: vagrant validate
-
-      - name: Lint provision.sh
-        run: |
-          brew install shellcheck
-          shellcheck provision.sh
-          shellcheck self-test/*.sh
 
       - name: Get versions from .image-versions.env
         id: image-versions
@@ -63,12 +42,67 @@ jobs:
           echo DELEGATOR_VERSION $DELEGATOR_VERSION
           echo WORKER_VERSION $WORKER_VERSION
 
-      - name: Vagrant up
-        env:
-          HOST_PORT: 80
-          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: vagrant up basil_worker
+#jobs:
+#  build:
+#    name: Build
+#    runs-on: macos-10.15
+#
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#
+#      - name: Show package versions
+#        run: |
+#          vagrant --version
+#          VBoxManage --version
+#
+#      - name: Cache multiple paths
+#        uses: actions/cache@v2
+#        with:
+#          path: |
+#            ~/.vagrant.d/boxes/focal-server-cloudimg-amd64-vagrant
+#          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+#
+#      - name: Validate Vagrantfile
+#        run: vagrant validate
+#
+#      - name: Lint provision.sh
+#        run: |
+#          brew install shellcheck
+#          shellcheck provision.sh
+#          shellcheck self-test/*.sh
+#
+#      - name: Get versions from .image-versions.env
+#        id: image-versions
+#        run: |
+#          cat .image-versions.env
+#          while read line
+#          do
+#            key=$(echo $line | cut -d'=' -f1)
+#            value=$(echo $line | cut -d'=' -f2)
+#            echo "::set-output name=$key::$value"
+#          done <<<$(cat .image-versions.env)
+#
+#      - name: Output image versions
+#        env:
+#          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+#          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+#          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+#          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+#          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+#        run: |
+#          echo COMPILER_VERSION $COMPILER_VERSION
+#          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
+#          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
+#          echo DELEGATOR_VERSION $DELEGATOR_VERSION
+#          echo WORKER_VERSION $WORKER_VERSION
+#
+#      - name: Vagrant up
+#        env:
+#          HOST_PORT: 80
+#          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+#          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+#          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+#          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+#          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+#        run: vagrant up basil_worker
