@@ -71,4 +71,11 @@ jobs:
           FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: vagrant up basil_worker
+        run: |
+          HOST_PORT=$HOST_PORT \
+          COMPILER_VERSION=$COMPILER_VERSION \
+          CHROME_RUNNER_VERSION=$CHROME_RUNNER_VERSION \
+          FIREFOX_RUNNER_VERSION=$FIREFOX_RUNNER_VERSION \
+          DELEGATOR_VERSION=$DELEGATOR_VERSION \
+          WORKER_VERSION=$WORKER_VERSION \
+          vagrant up basil_worker
