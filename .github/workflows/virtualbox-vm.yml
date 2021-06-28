@@ -49,20 +49,26 @@ jobs:
             echo "::set-output name=$key::$value"
           done <<<$(cat .image-versions.env)
 
-      - name: Examine versions
+      - name: Output image versions
+        env:
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
         run: |
-          echo steps.dependency-versions.outputs.COMPILER_VERSION ${{ steps.dependency-versions.outputs.COMPILER_VERSION }}
-          echo steps.dependency-versions.outputs.CHROME_RUNNER_VERSION ${{ steps.dependency-versions.outputs.CHROME_RUNNER_VERSION }}
-          echo steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION ${{ steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION }}
-          echo steps.dependency-versions.outputs.DELEGATOR_VERSION ${{ steps.dependency-versions.outputs.DELEGATOR_VERSION }}
-          echo steps.dependency-versions.outputs.WORKER_VERSION ${{ steps.dependency-versions.outputs.WORKER_VERSION }}
-#
-#      - name: Vagrant up
-#        run: |
-#          COMPILER_VERSION=0.29 \
-#          CHROME_RUNNER_VERSION=0.18 \
-#          FIREFOX_RUNNER_VERSION=0.18 \
-#          DELEGATOR_VERSION=0.6 \
-#          WORKER_VERSION=0.4 \
-#          HOST_PORT=80 \
-#          vagrant up basil_worker
+          echo COMPILER_VERSION $COMPILER_VERSION
+          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
+          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
+          echo DELEGATOR_VERSION $DELEGATOR_VERSION
+          echo WORKER_VERSION $WORKER_VERSION
+
+      - name: Vagrant up
+        env:
+          HOST_PORT: 80
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: vagrant up basil_worker
