@@ -55,13 +55,13 @@ jobs:
           echo steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION ${{ steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION }}
           echo steps.dependency-versions.outputs.DELEGATOR_VERSION ${{ steps.dependency-versions.outputs.DELEGATOR_VERSION }}
           echo steps.dependency-versions.outputs.WORKER_VERSION ${{ steps.dependency-versions.outputs.WORKER_VERSION }}
-
-      - name: Vagrant up
-        run: |
-          COMPILER_VERSION=0.29 \
-          CHROME_RUNNER_VERSION=0.18 \
-          FIREFOX_RUNNER_VERSION=0.18 \
-          DELEGATOR_VERSION=0.6 \
-          WORKER_VERSION=0.4 \
-          HOST_PORT=80 \
-          vagrant up basil_worker
+#
+#      - name: Vagrant up
+#        run: |
+#          COMPILER_VERSION=0.29 \
+#          CHROME_RUNNER_VERSION=0.18 \
+#          FIREFOX_RUNNER_VERSION=0.18 \
+#          DELEGATOR_VERSION=0.6 \
+#          WORKER_VERSION=0.4 \
+#          HOST_PORT=80 \
+#          vagrant up basil_worker
