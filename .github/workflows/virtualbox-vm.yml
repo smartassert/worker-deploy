@@ -20,10 +20,12 @@ jobs:
       - name: Get versions from .image-versions.env
         id: image-versions
         run: |
-          cat .image-versions.env
           while read line
           do
-            echo $line
+            key=$(echo $line | cut -d'=' -f1)
+            value=$(echo $line | cut -d'=' -f2)
+            echo "key: $key\n"
+            echo "value: $value\n"
           done <<<$(cat .image-versions.env)
 
       - name: Output image versions
