@@ -75,15 +75,21 @@ jobs:
           echo WORKER_VERSION $WORKER_VERSION
 
       - name: Verify image configuration
+        env:
+          COMPILER_VERSION: ${{ steps.dependency-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.dependency-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.dependency-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.dependency-versions.outputs.WORKER_VERSION }}
         run: |
           packer validate \
           -var 'digitalocean_api_token=${{ secrets.DIGITALOCEAN_API_TOKEN }}' \
           -var 'snapshot_name=${{ steps.snapshot_name.outputs.value }}' \
-          -var 'compiler_version=${{ steps.dependency-versions.outputs.COMPILER_VERSION }}' \
-          -var 'chrome_runner_version=${{ steps.dependency-versions.outputs.CHROME_RUNNER_VERSION }}' \
-          -var 'firefox_runner_version=${{ steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION }}' \
-          -var 'delegator_version=${{ steps.dependency-versions.outputs.DELEGATOR_VERSION }}' \
-          -var 'worker_version=${{ steps.dependency-versions.outputs.WORKER_VERSION }}' \
+          -var 'compiler_version=$COMPILER_VERSION' \
+          -var 'chrome_runner_version=$CHROME_RUNNER_VERSION' \
+          -var 'firefox_runner_version=$FIREFOX_RUNNER_VERSION' \
+          -var 'delegator_version=$DELEGATOR_VERSION' \
+          -var 'worker_version=$WORKER_VERSION' \
           image.pkr.hcl
 #
 #      - name: Create image
