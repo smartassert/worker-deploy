@@ -26,7 +26,7 @@ jobs:
             value=$(echo $line | cut -d'=' -f2)
             echo "key: $key\n"
             echo "value: $value\n"
-          done <<<$(cat .image-versions.env)
+          done <.image-versions.env
 
       - name: Output image versions
         env:
