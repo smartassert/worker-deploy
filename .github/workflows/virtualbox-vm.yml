@@ -23,9 +23,10 @@ jobs:
           cat .image-versions.env
           while read line
           do
-            key=$(echo $line | cut -d'=' -f1)
-            value=$(echo $line | cut -d'=' -f2)
-            echo "::set-output name=$key::$value"
+            echo $line
+#            key=$(echo $line | cut -d'=' -f1)
+#            value=$(echo $line | cut -d'=' -f2)
+#            echo "::set-output name=$key::$value"
           done <<<$(cat .image-versions.env)
 
       - name: Output image versions
