@@ -41,6 +41,7 @@ jobs:
       - name: Get versions from .image-versions.env
         id: dependency-versions
         run: |
+          cat .image-versions.env
           while read line
           do
             key=$(echo $line | cut -d'=' -f1)
