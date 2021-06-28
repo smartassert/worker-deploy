@@ -38,5 +38,30 @@ jobs:
           shellcheck provision.sh
           shellcheck self-test/*.sh
 
+      - name: Get versions from .image-versions.env
+        id: dependency-versions
+        run: |
+          while read line
+          do
+            key=$(echo $line | cut -d'=' -f1)
+            value=$(echo $line | cut -d'=' -f2)
+            echo "::set-output name=$key::$value"
+          done <<<$(cat .image-versions.env)
+
+      - name: Examine versions
+        run: |
+          echo steps.dependency-versions.outputs.COMPILER_VERSION ${{ steps.dependency-versions.outputs.COMPILER_VERSION }}
+          echo steps.dependency-versions.outputs.CHROME_RUNNER_VERSION ${{ steps.dependency-versions.outputs.CHROME_RUNNER_VERSION }}
+          echo steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION ${{ steps.dependency-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          echo steps.dependency-versions.outputs.DELEGATOR_VERSION ${{ steps.dependency-versions.outputs.DELEGATOR_VERSION }}
+          echo steps.dependency-versions.outputs.WORKER_VERSION ${{ steps.dependency-versions.outputs.WORKER_VERSION }}
+
       - name: Vagrant up
-        run: HOST_PORT=80 vagrant up basil_worker
+        run: |
+          COMPILER_VERSION=0.29 \
+          CHROME_RUNNER_VERSION=0.18 \
+          FIREFOX_RUNNER_VERSION=0.18 \
+          DELEGATOR_VERSION=0.6 \
+          WORKER_VERSION=0.4 \
+          HOST_PORT=80 \
+          vagrant up basil_worker
