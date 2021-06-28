@@ -2,7 +2,7 @@ name: Repository Dispatch Listener
 
 on:
   repository_dispatch:
-    types: [test]
+    types: [worker-release]
 
 jobs:
   build:
