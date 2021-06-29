@@ -2,10 +2,37 @@
 variable "digitalocean_api_token" {
   type      = string
   sensitive = true
+  default = env("DIGITALOCEAN_API_TOKEN")
 }
 
 variable "snapshot_name" {
   type = string
+  default = env("SNAPSHOT_NAME")
+}
+
+variable "compiler_version" {
+  type = string
+  default = env("COMPILER_VERSION")
+}
+
+variable "chrome_runner_version" {
+  type = string
+  default = env("CHROME_RUNNER_VERSION")
+}
+
+variable "firefox_runner_version" {
+  type = string
+  default = env("FIREFOX_RUNNER_VERSION")
+}
+
+variable "delegator_version" {
+  type = string
+  default = env("DELEGATOR_VERSION")
+}
+
+variable "worker_version" {
+  type = string
+  default = env("WORKER_VERSION")
 }
 
 source "digitalocean" "worker_base" {
@@ -46,11 +73,14 @@ build {
   }
 
   provisioner "shell" {
-    inline = ["echo $pwd"]
-  }
-
-  provisioner "shell" {
-    environment_vars = ["APP_BUILD_CONTEXT=~/build", "LOCAL_SOURCE_PATH=/var/basil/source"]
+    environment_vars = [
+      "LOCAL_SOURCE_PATH=/var/basil/source",
+      "COMPILER_VERSION=${var.compiler_version}",
+      "CHROME_RUNNER_VERSION=${var.chrome_runner_version}",
+      "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
+      "DELEGATOR_VERSION=${var.delegator_version}",
+      "WORKER_VERSION=${var.worker_version}",
+    ]
     scripts = ["./provision.sh"]
   }
 
@@ -99,6 +129,14 @@ build {
   }
 
   provisioner "shell" {
+    environment_vars = [
+      "LOCAL_SOURCE_PATH=/var/basil/source",
+      "COMPILER_VERSION=${var.compiler_version}",
+      "CHROME_RUNNER_VERSION=${var.chrome_runner_version}",
+      "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
+      "DELEGATOR_VERSION=${var.delegator_version}",
+      "WORKER_VERSION=${var.worker_version}",
+    ]
     scripts = ["./self-test/app.sh"]
   }
 

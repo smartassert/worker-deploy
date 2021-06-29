@@ -6,7 +6,7 @@ networks:
 
 services:
   compiler:
-    image: ghcr.io/smartassert/compiler:0.29
+    image: ghcr.io/smartassert/compiler:${COMPILER_VERSION}
     container_name: compiler
     restart: always
     networks:
@@ -16,7 +16,7 @@ services:
       - ${LOCAL_TARGET_PATH}:${TARGET_PATH}
 
   chrome-runner:
-    image: ghcr.io/smartassert/chrome-runner:0.18
+    image: ghcr.io/smartassert/chrome-runner:${CHROME_RUNNER_VERSION}
     container_name: chrome-runner
     restart: always
     networks:
@@ -25,7 +25,7 @@ services:
       - ${LOCAL_TARGET_PATH}:${TARGET_PATH}
 
   firefox-runner:
-    image: ghcr.io/smartassert/firefox-runner:0.18
+    image: ghcr.io/smartassert/firefox-runner:${FIREFOX_RUNNER_VERSION}
     container_name: firefox-runner
     restart: always
     networks:
@@ -34,7 +34,7 @@ services:
       - ${LOCAL_TARGET_PATH}:${TARGET_PATH}
 
   delegator:
-    image: ghcr.io/smartassert/runner-delegator:0.6
+    image: ghcr.io/smartassert/runner-delegator:${DELEGATOR_VERSION}
     container_name: delegator
     restart: always
     networks:
@@ -75,7 +75,7 @@ services:
       - /var/log/nginx:/var/log/nginx
 
   app-web:
-    image: ghcr.io/smartassert/worker:0.4
+    image: ghcr.io/smartassert/worker:${WORKER_VERSION}
     container_name: app-web
     restart: always
     networks:
