@@ -94,11 +94,11 @@ jobs:
           packer build \
           -var 'digitalocean_api_token=${{ secrets.DIGITALOCEAN_API_TOKEN }}' \
           -var 'snapshot_name=${{ steps.snapshot_name.outputs.value }}' \
-          -var 'compiler_version=$COMPILER_VERSION' \
-          -var 'chrome_runner_version=$CHROME_RUNNER_VERSION' \
-          -var 'firefox_runner_version=$FIREFOX_RUNNER_VERSION' \
-          -var 'delegator_version=$DELEGATOR_VERSION' \
-          -var 'worker_version=$WORKER_VERSION' \
+          -var 'compiler_version=0.29' \
+          -var 'chrome_runner_version=0.18' \
+          -var 'firefox_runner_version=0.18' \
+          -var 'delegator_version=0.6' \
+          -var 'worker_version=0.4' \
           image.pkr.hcl | tee packer.log
           ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
           ./ci/verify-snapshot-exists.sh $ID ${{ secrets.DIGITALOCEAN_API_TOKEN }}
