@@ -41,7 +41,7 @@ jobs:
           packer --version
           if [ $? -ne 0 ]; then exit 1; fi; exit 0;
 
-      - name: Get versions from .image-versions.env
+      - name: Get versions from image-versions.env
         id: image-versions
         run: |
           while read line
@@ -49,7 +49,7 @@ jobs:
             key=$(echo $line | cut -d'=' -f1)
             value=$(echo $line | cut -d'=' -f2)
             echo "::set-output name=$key::$value"
-          done <.image-versions.env
+          done < image-versions.env
 
       - name: Output image versions
         env:
