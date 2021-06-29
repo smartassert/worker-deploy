@@ -42,14 +42,16 @@ jobs:
             SOURCE_URL=$(echo $SOURCE_URL_TEMPLATE | sed "s@{{ version }}@$RELEASE_TAG_NAME@g")
             SOURCE_URL_STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $SOURCE_URL)
 
-            if [ "200" != "$ASSERT_URL_STATUS_CODE" ]; then
-              echo "release url not exists"
+            if [ "200" != "$SOURCE_URL_STATUS_CODE" ]; then
+              echo "source url not exists"
               exit 1
             else
+              echo "using source url"
               URL=$SOURCE_URL
             fi
 
           else
+            echo "using asset url"
             URL=$ASSERT_URL
           fi
 
