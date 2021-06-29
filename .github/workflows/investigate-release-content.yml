@@ -11,5 +11,44 @@ jobs:
     steps:
       - name: Dump GitHub context
         env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+          CONTEXT: ${{ toJson(github) }}
+        run: echo "$CONTEXT"
+
+      - name: Dump release tag name
+        env:
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+        run: echo $RELEASE_TAG_NAME
+
+      - name: Dump assets context
+        env:
+          CONTEXT: ${{ toJson(github.event.release.assets) }}
+        run: echo "$CONTEXT"
+
+      - name: Extract image versions url
+        id: image-versions-url
+        env:
+          CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo $CONTEXT | grep --only-matching 'https://.*.image-versions.env'
+          BROWSER_DOWNLOAD_URL=$(echo $CONTEXT | grep --only-matching 'https://.*.image-versions.env')
+          echo "::set-output name=value::$BROWSER_DOWNLOAD_URL"
+
+      - name: Get image versions
+        env:
+          BROWSER_DOWNLOAD_URL: ${{ steps.image-versions-url.outputs.value }}
+        run: |
+          echo BROWSER_DOWNLOAD_URL $BROWSER_DOWNLOAD_URL
+          IMAGE_VERSIONS=$(curl -L $BROWSER_DOWNLOAD_URL)
+          echo $IMAGE_VERSIONS
+          echo $IMAGE_VERSIONS > .image-versions.env
+
+      - name: Dump image versions
+        run: |
+          ls -la
+          cat .image-versions.env
+          while read line
+          do
+            key=$(echo $line | cut -d'=' -f1)
+            value=$(echo $line | cut -d'=' -f2)
+            echo "::set-output name=$key::$value"
+          done < .image-versions.env
