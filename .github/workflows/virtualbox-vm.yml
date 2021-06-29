@@ -82,11 +82,16 @@ jobs:
       - name: Get image versions
         env:
           URL: ${{ steps.image-versions-url.outputs.value }}
-        run: curl -s -L --output ./local-image-versions.env $URL
+        run: |
+          ls -la
+          curl -L --output ./local-image-versions.env $URL
+          ls -la
 
       - name: Get versions from image-versions.env
         id: image-versions
         run: |
+          ls -la
+
           while read line
           do
             key=$(echo $line | cut -d'=' -f1)
