@@ -29,26 +29,26 @@ jobs:
         env:
           CONTEXT: ${{ toJson(github) }}
         run: |
-          echo $CONTEXT | grep --only-matching 'https://.*.image-versions.env'
-          BROWSER_DOWNLOAD_URL=$(echo $CONTEXT | grep --only-matching 'https://.*.image-versions.env')
-          echo "::set-output name=value::$BROWSER_DOWNLOAD_URL"
-
-      - name: Get image versions
-        env:
-          BROWSER_DOWNLOAD_URL: ${{ steps.image-versions-url.outputs.value }}
-        run: |
-          echo BROWSER_DOWNLOAD_URL $BROWSER_DOWNLOAD_URL
-          IMAGE_VERSIONS=$(curl -L $BROWSER_DOWNLOAD_URL)
-          echo $IMAGE_VERSIONS
-          echo $IMAGE_VERSIONS > .image-versions.env
-
-      - name: Dump image versions
-        run: |
-          ls -la
-          cat .image-versions.env
-          while read line
-          do
-            key=$(echo $line | cut -d'=' -f1)
-            value=$(echo $line | cut -d'=' -f2)
-            echo "::set-output name=$key::$value"
-          done < .image-versions.env
+          echo $CONTEXT | grep --only-matching 'https://github.com/smartassert.*\.image-versions\.env'
+#          BROWSER_DOWNLOAD_URL=$(echo $CONTEXT | grep --only-matching 'https://.*.image-versions.env')
+#          echo "::set-output name=value::$BROWSER_DOWNLOAD_URL"
+#
+#      - name: Get image versions
+#        env:
+#          BROWSER_DOWNLOAD_URL: ${{ steps.image-versions-url.outputs.value }}
+#        run: |
+#          echo BROWSER_DOWNLOAD_URL $BROWSER_DOWNLOAD_URL
+#          IMAGE_VERSIONS=$(curl -L $BROWSER_DOWNLOAD_URL)
+#          echo $IMAGE_VERSIONS
+#          echo $IMAGE_VERSIONS > .image-versions.env
+#
+#      - name: Dump image versions
+#        run: |
+#          ls -la
+#          cat .image-versions.env
+#          while read line
+#          do
+#            key=$(echo $line | cut -d'=' -f1)
+#            value=$(echo $line | cut -d'=' -f2)
+#            echo "::set-output name=$key::$value"
+#          done < .image-versions.env
