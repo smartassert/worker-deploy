@@ -2,30 +2,37 @@
 variable "digitalocean_api_token" {
   type      = string
   sensitive = true
+  default = env("DIGITALOCEAN_API_TOKEN")
 }
 
 variable "snapshot_name" {
   type = string
+  default = env("SNAPSHOT_NAME")
 }
 
 variable "compiler_version" {
   type = string
+  default = env("COMPILER_VERSION")
 }
 
 variable "chrome_runner_version" {
   type = string
+  default = env("CHROME_RUNNER_VERSION")
 }
 
 variable "firefox_runner_version" {
   type = string
+  default = env("FIREFOX_RUNNER_VERSION")
 }
 
 variable "delegator_version" {
   type = string
+  default = env("DELEGATOR_VERSION")
 }
 
 variable "worker_version" {
   type = string
+  default = env("WORKER_VERSION")
 }
 
 source "digitalocean" "worker_base" {
