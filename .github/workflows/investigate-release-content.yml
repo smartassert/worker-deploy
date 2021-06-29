@@ -2,6 +2,8 @@ name: "[Temp] Investigate release payload"
 
 on:
   release:
+    types:
+      - published
 
 jobs:
   build:
@@ -27,10 +29,10 @@ jobs:
       - name: Build image versions url
         id: image-versions-url
         env:
-          URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/default.image-versions.env
+          URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
-          URL=$(echo $URL_TEMPLATE | sed 's@{{ version }}@$RELEASE_TAG_NAME@g')
+          URL=$(echo $URL_TEMPLATE | sed "s@{{ version }}@$RELEASE_TAG_NAME@g")
           echo "::set-output name=value::$URL"
 
       - name: Get image versions
