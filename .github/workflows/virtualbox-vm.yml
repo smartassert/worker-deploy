@@ -20,6 +20,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Set version from release tag
+        id: version
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+        run: |
+          [[ ! -z "$VERSION" ]] && echo "::set-output name=value::$VERSION" || echo "::set-output name=value::master"
+
       - name: Show package versions
         run: |
           vagrant --version
@@ -46,15 +53,15 @@ jobs:
         env:
           ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
           SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
-          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+          VERSION: ${{ steps.version.outputs.value }}
         run: |
-          ASSERT_URL=$(echo $ASSERT_URL_TEMPLATE | sed "s@{{ version }}@$RELEASE_TAG_NAME@g")
+          ASSERT_URL=$(echo $ASSERT_URL_TEMPLATE | sed "s@{{ version }}@$VERSION@g")
           ASSERT_URL_STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $ASSERT_URL)
 
           if [ "200" != "$ASSERT_URL_STATUS_CODE" ]; then
             echo "assert url not exists"
 
-            SOURCE_URL=$(echo $SOURCE_URL_TEMPLATE | sed "s@{{ version }}@$RELEASE_TAG_NAME@g")
+            SOURCE_URL=$(echo $SOURCE_URL_TEMPLATE | sed "s@{{ version }}@$VERSION@g")
             SOURCE_URL_STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $SOURCE_URL)
 
             if [ "200" != "$SOURCE_URL_STATUS_CODE" ]; then
