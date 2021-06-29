@@ -29,28 +29,43 @@ jobs:
       - name: Build image versions url
         id: image-versions-url
         env:
-          URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
-          URL=$(echo $URL_TEMPLATE | sed "s@{{ version }}@$RELEASE_TAG_NAME@g")
+          ASSERT_URL=$(echo $ASSERT_URL_TEMPLATE | sed "s@{{ version }}@$RELEASE_TAG_NAME@g")
+          ASSERT_URL_STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $ASSERT_URL)
+
+          if [ "200" != "$ASSERT_URL_STATUS_CODE" ]; then
+            echo "assert url not exists"
+
+            SOURCE_URL=$(echo $SOURCE_URL_TEMPLATE | sed "s@{{ version }}@$RELEASE_TAG_NAME@g")
+            SOURCE_URL_STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $SOURCE_URL)
+
+            if [ "200" != "$ASSERT_URL_STATUS_CODE" ]; then
+              echo "release url not exists"
+              exit 1
+            else
+              URL=$SOURCE_URL
+            fi
+
+          else
+            URL=$ASSERT_URL
+          fi
+
           echo "::set-output name=value::$URL"
 
       - name: Get image versions
         env:
-          IMAGE_VERSIONS_URL: ${{ steps.image-versions-url.outputs.value }}
+          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+          URL: ${{ steps.image-versions-url.outputs.value }}
         run: |
-          STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $IMAGE_VERSIONS_URL)
-
-          if [ "200" == "$STATUS_CODE" ]; then
-            echo "exists"
-          else
-            echo "not exists"
-          fi
-
-#          echo IMAGE_VERSIONS_URL $IMAGE_VERSIONS_URLL
-#          IMAGE_VERSIONS=$(curl -L $IMAGE_VERSIONS_URL)
-#          echo $IMAGE_VERSIONS
-#          echo $IMAGE_VERSIONS > image-versions.env
+          echo URL $URL
+          IMAGE_VERSIONS=$(curl -L $URL)
+          echo $IMAGE_VERSIONS
+          echo $IMAGE_VERSIONS > image-versions.env
 
       - name: Dump image versions
         run: |
