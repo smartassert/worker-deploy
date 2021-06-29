@@ -50,15 +50,15 @@ jobs:
 #          echo IMAGE_VERSIONS_URL $IMAGE_VERSIONS_URLL
 #          IMAGE_VERSIONS=$(curl -L $IMAGE_VERSIONS_URL)
 #          echo $IMAGE_VERSIONS
-#          echo $IMAGE_VERSIONS > .image-versions.env
+#          echo $IMAGE_VERSIONS > image-versions.env
 
       - name: Dump image versions
         run: |
           ls -la
-          cat .image-versions.env
+          cat image-versions.env
           while read line
           do
             key=$(echo $line | cut -d'=' -f1)
             value=$(echo $line | cut -d'=' -f2)
             echo "::set-output name=$key::$value"
-          done < .image-versions.env
+          done < image-versions.env
