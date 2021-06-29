@@ -27,9 +27,10 @@ jobs:
       - name: Extract image versions url
         id: image-versions-url
         env:
-          CONTEXT: ${{ toJson(github) }}
+          ASSETS_CONTEXT: ${{ toJson(github.event.release.assets) }}
         run: |
-          echo $CONTEXT | grep --only-matching 'https://github.com/smartassert.*\.image-versions\.env'
+          jq '.[] | .browser_download_url' | grep "\.image-versions\.env" | sed 's/"//g' <<< $ASSETS_CONTEXT
+#          echo $CONTEXT | grep --only-matching 'https://github.com/smartassert.*\.image-versions\.env'
 #          BROWSER_DOWNLOAD_URL=$(echo $CONTEXT | grep --only-matching 'https://.*.image-versions.env')
 #          echo "::set-output name=value::$BROWSER_DOWNLOAD_URL"
 #
