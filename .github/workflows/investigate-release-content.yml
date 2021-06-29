@@ -39,7 +39,7 @@ jobs:
         env:
           IMAGE_VERSIONS_URL: ${{ steps.image-versions-url.outputs.value }}
         run: |
-          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $IMAGE_VERSIONS_URL)
+          STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $IMAGE_VERSIONS_URL)
 
           if [ "200" == "$STATUS_CODE" ]; then
             echo "exists"
