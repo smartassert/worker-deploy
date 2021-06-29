@@ -41,7 +41,7 @@ jobs:
         run: |
           STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $IMAGE_VERSIONS_URL)
 
-          if [ "200" == "STATUS_CODE" ]; then
+          if [ "200" == "$STATUS_CODE" ]; then
             echo "exists"
           else
             echo "not exists"
