@@ -37,12 +37,20 @@ jobs:
 
       - name: Get image versions
         env:
-          BROWSER_DOWNLOAD_URL: ${{ steps.image-versions-url.outputs.value }}
+          IMAGE_VERSIONS_URL: ${{ steps.image-versions-url.outputs.value }}
         run: |
-          echo BROWSER_DOWNLOAD_URL $BROWSER_DOWNLOAD_URL
-          IMAGE_VERSIONS=$(curl -L $BROWSER_DOWNLOAD_URL)
-          echo $IMAGE_VERSIONS
-          echo $IMAGE_VERSIONS > .image-versions.env
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" $IMAGE_VERSIONS_URL)
+
+          if [ "200" == "STATUS_CODE" ]; then
+            echo "exists"
+          else
+            echo "not exists"
+          fi
+
+#          echo IMAGE_VERSIONS_URL $IMAGE_VERSIONS_URLL
+#          IMAGE_VERSIONS=$(curl -L $IMAGE_VERSIONS_URL)
+#          echo $IMAGE_VERSIONS
+#          echo $IMAGE_VERSIONS > .image-versions.env
 
       - name: Dump image versions
         run: |
