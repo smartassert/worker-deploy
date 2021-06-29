@@ -3,8 +3,23 @@
 INITIAL_DIRECTORY=$PWD
 
 # Setup
-sudo docker-compose -f docker-compose.yml -f self-test/services.yml build
-sudo docker-compose -f docker-compose.yml -f self-test/services.yml up -d
+sudo \
+  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+  COMPILER_VERSION="$COMPILER_VERSION" \
+  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+  WORKER_VERSION="$WORKER_VERSION" \
+  docker-compose -f docker-compose.yml -f self-test/services.yml build
+
+sudo \
+  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+  COMPILER_VERSION="$COMPILER_VERSION" \
+  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+  WORKER_VERSION="$WORKER_VERSION" \
+  docker-compose -f docker-compose.yml -f self-test/services.yml up -d
 
 cd ./self-test/app || exit
 
@@ -31,7 +46,15 @@ LAST_EXIT_CODE=$?
 cd "$INITIAL_DIRECTORY" || exit
 sudo docker-compose -f docker-compose.yml -f self-test/services.yml stop http-fixtures
 sudo docker-compose -f docker-compose.yml -f self-test/services.yml stop callback-receiver
-sudo docker-compose up -d --remove-orphans
+
+sudo \
+  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+  COMPILER_VERSION="$COMPILER_VERSION" \
+  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+  WORKER_VERSION="$WORKER_VERSION" \
+  docker-compose up -d --remove-orphans
 
 DB_TABLES=(
   "job"
