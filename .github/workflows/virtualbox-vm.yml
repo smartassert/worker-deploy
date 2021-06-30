@@ -25,7 +25,46 @@ jobs:
         env:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
-          [[ ! -z "$VERSION" ]] && echo "::set-output name=value::$VERSION" || echo "::set-output name=value::master"
+          VERSION_LABEL=$(./ci/create-version-label.sh)
+          echo "::set-output name=value::$VERSION_LABEL"
+
+      - name: Build image versions url
+        id: image-versions-url
+        env:
+          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          URL=$(./ci/create-image-versions-url.sh)
+          if [ $? -ne 0 ]; then
+            echo "Failed to build image versions url"
+            exit 1
+          fi
+
+          echo "::set-output name=value::$URL"
+
+      - name: Store image versions
+        env:
+          URL: ${{ steps.image-versions-url.outputs.value }}
+        run: ./ci/store-image-versions.sh
+
+      - name: Get versions from local.image-versions.env
+        id: image-versions
+        run: ./ci/read-image-versions.sh
+
+      - name: Output image versions
+        env:
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: |
+          echo COMPILER_VERSION $COMPILER_VERSION
+          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
+          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
+          echo DELEGATOR_VERSION $DELEGATOR_VERSION
+          echo WORKER_VERSION $WORKER_VERSION
 
       - name: Show package versions
         run: |
@@ -47,67 +86,6 @@ jobs:
           brew install shellcheck
           shellcheck provision.sh
           shellcheck self-test/*.sh
-
-      - name: Build image versions url
-        id: image-versions-url
-        env:
-          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
-          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
-          VERSION: ${{ steps.version.outputs.value }}
-        run: |
-          ASSERT_URL=$(echo $ASSERT_URL_TEMPLATE | sed "s@{{ version }}@$VERSION@g")
-          ASSERT_URL_STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $ASSERT_URL)
-
-          if [ "200" != "$ASSERT_URL_STATUS_CODE" ]; then
-            echo "assert url not exists"
-
-            SOURCE_URL=$(echo $SOURCE_URL_TEMPLATE | sed "s@{{ version }}@$VERSION@g")
-            SOURCE_URL_STATUS_CODE=$(curl -L -s -o /dev/null -w "%{http_code}" $SOURCE_URL)
-
-            if [ "200" != "$SOURCE_URL_STATUS_CODE" ]; then
-              echo "source url not exists"
-              exit 1
-            else
-              echo "using source url"
-              URL=$SOURCE_URL
-            fi
-
-          else
-            echo "using asset url"
-            URL=$ASSERT_URL
-          fi
-
-          echo "::set-output name=value::$URL"
-
-      - name: Get image versions
-        env:
-          URL: ${{ steps.image-versions-url.outputs.value }}
-        run: |
-          curl -L --output ./local.image-versions.env $URL
-
-      - name: Get versions from image-versions.env
-        id: image-versions
-        run: |
-          while read line
-          do
-            key=$(echo $line | cut -d'=' -f1)
-            value=$(echo $line | cut -d'=' -f2)
-            echo "::set-output name=$key::$value"
-          done < local.image-versions.env
-
-      - name: Output image versions
-        env:
-          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: |
-          echo COMPILER_VERSION $COMPILER_VERSION
-          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
-          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
-          echo DELEGATOR_VERSION $DELEGATOR_VERSION
-          echo WORKER_VERSION $WORKER_VERSION
 
       - name: Vagrant up
         env:
