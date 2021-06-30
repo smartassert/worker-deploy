@@ -19,6 +19,45 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Build image versions url
+        id: image-versions-url
+        env:
+          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          URL=$(./ci/create-image-versions-url.sh)
+          if [ $? -ne 0 ]; then
+            echo "Failed to build image versions url"
+            exit 1
+          fi
+
+          echo "::set-output name=value::$URL"
+
+      - name: Store image versions
+        env:
+          URL: ${{ steps.image-versions-url.outputs.value }}
+        run: ./ci/store-image-versions.sh
+
+      - name: Get versions from local.image-versions.env
+        id: image-versions
+        run: ./ci/read-image-versions.sh
+
+      - name: Output image versions
+        env:
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: |
+          echo COMPILER_VERSION $COMPILER_VERSION
+          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
+          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
+          echo DELEGATOR_VERSION $DELEGATOR_VERSION
+          echo WORKER_VERSION $WORKER_VERSION
+
       - name: Set snapshot name
         id: snapshot_name
         run: |
@@ -40,30 +79,6 @@ jobs:
         run: |
           packer --version
           if [ $? -ne 0 ]; then exit 1; fi; exit 0;
-
-      - name: Get versions from image-versions.env
-        id: image-versions
-        run: |
-          while read line
-          do
-            key=$(echo $line | cut -d'=' -f1)
-            value=$(echo $line | cut -d'=' -f2)
-            echo "::set-output name=$key::$value"
-          done < image-versions.env
-
-      - name: Output image versions
-        env:
-          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: |
-          echo COMPILER_VERSION $COMPILER_VERSION
-          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
-          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
-          echo DELEGATOR_VERSION $DELEGATOR_VERSION
-          echo WORKER_VERSION $WORKER_VERSION
 
       - name: Verify image configuration
         env:
