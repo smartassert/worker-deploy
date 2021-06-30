@@ -1,4 +1,4 @@
-name: Repository Dispatch Listener
+name: Debug worker-release event
 
 on:
   repository_dispatch:
