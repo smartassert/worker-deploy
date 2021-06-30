@@ -14,3 +14,18 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+
+      - name: Dump client payload
+        env:
+          PAYLOAD: ${{ toJson(gitub.event.client_payload) }}
+        run: echo "$PAYLOAD"
+
+      - name: Dump versions
+        env:
+          PAYLOAD: ${{ gitub.event.client_payload }}
+        run:
+          echo "compiler_version" $PAYLOAD.compiler_version
+          echo "chrome_runner_version" $PAYLOAD.chrome_runner_version
+          echo "firefox_runner_version" $PAYLOAD.firefox_runner_version
+          echo "delegator_version" $PAYLOAD.delegator_version
+          echo "worker_version" $PAYLOAD.worker_version
