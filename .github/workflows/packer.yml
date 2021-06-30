@@ -19,13 +19,60 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Set version from release tag
+        id: version
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION_LABEL=$(./ci/create-version-label.sh)
+          echo "::set-output name=value::$VERSION_LABEL"
+
+      - name: Build image versions url
+        id: image-versions-url
+        env:
+          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          URL=$(./ci/create-image-versions-url.sh)
+          if [ $? -ne 0 ]; then
+            echo "Failed to build image versions url"
+            exit 1
+          fi
+
+          echo "::set-output name=value::$URL"
+
+      - name: Store image versions
+        env:
+          URL: ${{ steps.image-versions-url.outputs.value }}
+        run: ./ci/store-image-versions.sh
+
+      - name: Get versions from local.image-versions.env
+        id: image-versions
+        run: ./ci/read-image-versions.sh
+
+      - name: Output image versions
+        env:
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: |
+          echo COMPILER_VERSION $COMPILER_VERSION
+          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
+          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
+          echo DELEGATOR_VERSION $DELEGATOR_VERSION
+          echo WORKER_VERSION $WORKER_VERSION
+
       - name: Set snapshot name
         id: snapshot_name
-        run: |
-          EVENT_NAME=${{ github.event_name }} \
-          PR_NUMBER=${{ github.event.number }} \
-          RELEASE_TAG_NAME=${{ github.event.release.tag_name }} \
-          ./ci/create-snapshot-name.sh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.number }}
+          RELEASE_TAG_NAME: ${{ steps.version.outputs.value }}
+        run: ./ci/create-snapshot-name.sh
 
       - name: Verify snapshot name
         run: echo ${{ steps.snapshot_name.outputs.value }}
@@ -42,18 +89,27 @@ jobs:
           if [ $? -ne 0 ]; then exit 1; fi; exit 0;
 
       - name: Verify image configuration
-        run: |
-          packer validate \
-          -var 'digitalocean_api_token=${{ secrets.DIGITALOCEAN_API_TOKEN }}' \
-          -var 'snapshot_name=${{ steps.snapshot_name.outputs.value }}' \
-          image.pkr.hcl
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: packer validate image.pkr.hcl
 
       - name: Create image
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
         run: |
-          packer build \
-          -var 'digitalocean_api_token=${{ secrets.DIGITALOCEAN_API_TOKEN }}' \
-          -var 'snapshot_name=${{ steps.snapshot_name.outputs.value }}' \
-          image.pkr.hcl | tee packer.log
+          packer build image.pkr.hcl | tee packer.log
           ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
           ./ci/verify-snapshot-exists.sh $ID ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           if [ $? -ne 0 ]; then exit 1; fi; exit 0;
