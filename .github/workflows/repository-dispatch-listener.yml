@@ -22,10 +22,14 @@ jobs:
 
       - name: Dump versions
         env:
-          PAYLOAD: ${{ github.event.client_payload }}
+          COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
+          CHROME_RUNNER_VERSION: ${{ github.event.client_payload.chrome_runner_version }}
+          FIREFOX_RUNNER_VERSION: ${{ github.event.client_payload.firefox_runner_version }}
+          DELEGATOR_VERSION: ${{ github.event.client_payload.delegator_version }}
+          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
         run:
-          echo "compiler_version" $PAYLOAD.compiler_version
-          echo "chrome_runner_version" $PAYLOAD.chrome_runner_version
-          echo "firefox_runner_version" $PAYLOAD.firefox_runner_version
-          echo "delegator_version" $PAYLOAD.delegator_version
-          echo "worker_version" $PAYLOAD.worker_version
+          echo "compiler_version" $COMPILER_VERSION
+          echo "chrome_runner_version" $CHROME_RUNNER_VERSION
+          echo "firefox_runner_version" $FIREFOX_RUNNER_VERSION
+          echo "delegator_version" $DELEGATOR_VERSION
+          echo "worker_version" $WORKER_VERSION
