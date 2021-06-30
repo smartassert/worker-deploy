@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-echo "pre cat"
-cat local.image-versions.env
-echo "post cat"
-
 while read line
 do
   key=$(echo $line | cut -d'=' -f1)
