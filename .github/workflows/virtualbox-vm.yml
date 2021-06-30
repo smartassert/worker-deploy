@@ -1,0 +1,98 @@
+name: VirtualBox VM
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    name: Build
+    runs-on: macos-10.15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set version from release tag
+        id: version
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION_LABEL=$(./ci/create-version-label.sh)
+          echo "::set-output name=value::$VERSION_LABEL"
+
+      - name: Build image versions url
+        id: image-versions-url
+        env:
+          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          URL=$(./ci/create-image-versions-url.sh)
+          if [ $? -ne 0 ]; then
+            echo "Failed to build image versions url"
+            exit 1
+          fi
+
+          echo "::set-output name=value::$URL"
+
+      - name: Store image versions
+        env:
+          URL: ${{ steps.image-versions-url.outputs.value }}
+        run: ./ci/store-image-versions.sh
+
+      - name: Get versions from local.image-versions.env
+        id: image-versions
+        run: ./ci/read-image-versions.sh
+
+      - name: Output image versions
+        env:
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: |
+          echo COMPILER_VERSION $COMPILER_VERSION
+          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
+          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
+          echo DELEGATOR_VERSION $DELEGATOR_VERSION
+          echo WORKER_VERSION $WORKER_VERSION
+
+      - name: Show package versions
+        run: |
+          vagrant --version
+          VBoxManage --version
+
+      - name: Cache multiple paths
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.vagrant.d/boxes/focal-server-cloudimg-amd64-vagrant
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
+      - name: Validate Vagrantfile
+        run: vagrant validate
+
+      - name: Lint provision.sh
+        run: |
+          brew install shellcheck
+          shellcheck provision.sh
+          shellcheck self-test/*.sh
+
+      - name: Vagrant up
+        env:
+          HOST_PORT: 80
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: vagrant up basil_worker

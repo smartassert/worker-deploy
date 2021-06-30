@@ -19,37 +19,38 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Set snapshot name
-        id: snapshot_name
+
+      - name: Set version from release tag
+        id: version
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
         run: |
-          EVENT_NAME=${{ github.event_name }} \
-          PR_NUMBER=${{ github.event.number }} \
-          RELEASE_TAG_NAME=${{ github.event.release.tag_name }} \
-          ./ci/create-snapshot-name.sh
+          VERSION_LABEL=$(./ci/create-version-label.sh)
+          echo "::set-output name=value::$VERSION_LABEL"
 
-      - name: Verify snapshot name
-        run: echo ${{ steps.snapshot_name.outputs.value }}
-
-      - name: Install packer
+      - name: Build image versions url
+        id: image-versions-url
+        env:
+          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
+          VERSION: ${{ steps.version.outputs.value }}
         run: |
-          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-          sudo apt-get update && sudo apt-get install packer
+          URL=$(./ci/create-image-versions-url.sh)
+          if [ $? -ne 0 ]; then
+            echo "Failed to build image versions url"
+            exit 1
+          fi
 
-      - name: Verify packer installation
-        run: |
-          packer --version
-          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
+          echo "::set-output name=value::$URL"
 
-      - name: Get versions from image-versions.env
+      - name: Store image versions
+        env:
+          URL: ${{ steps.image-versions-url.outputs.value }}
+        run: ./ci/store-image-versions.sh
+
+      - name: Get versions from local.image-versions.env
         id: image-versions
-        run: |
-          while read line
-          do
-            key=$(echo $line | cut -d'=' -f1)
-            value=$(echo $line | cut -d'=' -f2)
-            echo "::set-output name=$key::$value"
-          done < image-versions.env
+        run: ./ci/read-image-versions.sh
 
       - name: Output image versions
         env:
@@ -65,6 +66,28 @@ jobs:
           echo DELEGATOR_VERSION $DELEGATOR_VERSION
           echo WORKER_VERSION $WORKER_VERSION
 
+      - name: Set snapshot name
+        id: snapshot_name
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.number }}
+          RELEASE_TAG_NAME: ${{ steps.version.outputs.value }}
+        run: ./ci/create-snapshot-name.sh
+
+      - name: Verify snapshot name
+        run: echo ${{ steps.snapshot_name.outputs.value }}
+
+      - name: Install packer
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install packer
+
+      - name: Verify packer installation
+        run: |
+          packer --version
+          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
+
       - name: Verify image configuration
         env:
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
@@ -74,8 +97,7 @@ jobs:
           FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: |
-          packer validate image.pkr.hcl
+        run: packer validate image.pkr.hcl
 
       - name: Create image
         env:
