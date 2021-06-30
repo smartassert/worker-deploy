@@ -20,6 +20,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Set version from release tag
+        id: version
+        env:
+          VERSION: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION_LABEL=$(./ci/create-version-label.sh)
+          echo "::set-output name=value::$VERSION_LABEL"
+
       - name: Build image versions url
         id: image-versions-url
         env:
