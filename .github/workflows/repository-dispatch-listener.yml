@@ -17,12 +17,12 @@ jobs:
 
       - name: Dump client payload
         env:
-          PAYLOAD: ${{ toJson(gitub.event.client_payload) }}
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: echo "$PAYLOAD"
 
       - name: Dump versions
         env:
-          PAYLOAD: ${{ gitub.event.client_payload }}
+          PAYLOAD: ${{ github.event.client_payload }}
         run:
           echo "compiler_version" $PAYLOAD.compiler_version
           echo "chrome_runner_version" $PAYLOAD.chrome_runner_version
