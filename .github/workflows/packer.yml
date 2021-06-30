@@ -68,11 +68,11 @@ jobs:
 
       - name: Set snapshot name
         id: snapshot_name
-        run: |
-          EVENT_NAME=${{ github.event_name }} \
-          PR_NUMBER=${{ github.event.number }} \
-          RELEASE_TAG_NAME=${{ github.event.release.tag_name }} \
-          ./ci/create-snapshot-name.sh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.number }}
+          RELEASE_TAG_NAME: ${{ steps.version.outputs.value }}
+        run: ./ci/create-snapshot-name.sh
 
       - name: Verify snapshot name
         run: echo ${{ steps.snapshot_name.outputs.value }}
@@ -97,8 +97,7 @@ jobs:
           FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: |
-          packer validate image.pkr.hcl
+        run: packer validate image.pkr.hcl
 
       - name: Create image
         env:
