@@ -46,6 +46,7 @@ jobs:
       - name: Store image versions
         env:
           URL: ${{ steps.image-versions-url.outputs.value }}
+          IMAGE_VERSIONS_PATH: ./local.image-versions.env
         run: ./ci/store-image-versions.sh
 
       - name: Get versions from local.image-versions.env
