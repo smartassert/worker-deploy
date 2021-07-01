@@ -1,4 +1,4 @@
-name: Build Image
+name: Release
 
 on:
   push:
@@ -10,23 +10,69 @@ on:
   release:
     types:
       - published
+  repository_dispatch:
+    types: [worker-release]
 
 jobs:
   build:
-    name: Build
+    name: Release
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set version from release tag
+      - name: Set version
         id: version
         env:
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
         run: |
           VERSION_LABEL=$(./ci/create-version-label.sh)
           echo "::set-output name=value::$VERSION_LABEL"
+
+      - name: Create release title
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        id: title
+        env:
+          VERSION: ${{ github.event.client_payload.worker_version }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          echo EVENT_NAME $EVENT_NAME
+          echo "::set-output name=value::Automatic release $VERSION"
+
+      - name: Create image-versions.env for release
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        env:
+          COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
+          CHROME_RUNNER_VERSION: ${{ github.event.client_payload.chrome_runner_version }}
+          FIREFOX_RUNNER_VERSION: ${{ github.event.client_payload.firefox_runner_version }}
+          DELEGATOR_VERSION: ${{ github.event.client_payload.delegator_version }}
+          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
+        run: |
+          rm -f image-versions.env
+          echo "COMPILER_VERSION=$COMPILER_VERSION" >> image-versions.env
+          echo "CHROME_RUNNER_VERSION=$CHROME_RUNNER_VERSION" >> image-versions.env
+          echo "FIREFOX_RUNNER_VERSION=$FIREFOX_RUNNER_VERSION" >> image-versions.env
+          echo "DELEGATOR_VERSION=$DELEGATOR_VERSION" >> image-versions.env
+          echo "WORKER_VERSION=$WORKER_VERSION" >> image-versions.env
+
+      - name: Create release
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: false
+          automatic_release_tag: ${{ github.event.client_payload.worker_version }}
+          title: ${{ steps.title.outputs.value }}
+          files: |
+            image-versions.env
+
+      - name: Remove release-created image-versions.env
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        run: |
+          rm -f image-versions.env
 
       - name: Build image versions url
         id: image-versions-url
