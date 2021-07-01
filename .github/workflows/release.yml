@@ -1,17 +1,17 @@
 name: Release
 
 on:
-#  push:
-#    branches:
-#      - master
+  push:
+    branches:
+      - master
   pull_request:
-#    branches:
-#      - master
-#  release:
-#    types:
-#      - published
-#  repository_dispatch:
-#    types: [worker-release]
+    branches:
+      - master
+  release:
+    types:
+      - published
+  repository_dispatch:
+    types: [worker-release]
 
 jobs:
   build:
