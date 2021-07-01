@@ -163,8 +163,8 @@ jobs:
           ./ci/verify-snapshot-exists.sh $ID ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           if [ $? -ne 0 ]; then exit 1; fi; exit 0;
 
-      - name: Remove created image
-        if: ${{ github.event_name }} != 'release'
+      - name: Remove created image if not a release
+        if: ${{ github.event_name != 'repository_dispatch' && github.event_name != 'release' }}
         run: |
           ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
           ./ci/delete-snapshot.sh $ID ${{ secrets.DIGITALOCEAN_API_TOKEN }}
