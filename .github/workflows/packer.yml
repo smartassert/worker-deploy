@@ -23,7 +23,7 @@ jobs:
       - name: Set version from release tag
         id: version
         env:
-          VERSION: ${{ github.event.release.tag_name }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
           VERSION_LABEL=$(./ci/create-version-label.sh)
           echo "::set-output name=value::$VERSION_LABEL"
