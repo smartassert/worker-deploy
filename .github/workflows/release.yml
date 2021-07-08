@@ -19,197 +19,177 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#
-#      - name: Set version
-#        id: version
-#        env:
-#          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
-#          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
-#        run: |
-#          VERSION_LABEL=$(./ci/create-version-label.sh)
-#          echo "::set-output name=value::$VERSION_LABEL"
-#
-#      - name: Create release title
-#        if: ${{ github.event_name == 'repository_dispatch' }}
-#        id: title
-#        env:
-#          VERSION: ${{ github.event.client_payload.worker_version }}
-#          EVENT_NAME: ${{ github.event_name }}
-#        run: |
-#          echo EVENT_NAME $EVENT_NAME
-#          echo "::set-output name=value::Automatic release $VERSION"
-#
-#      - name: Create image-versions.env for release
-#        if: ${{ github.event_name == 'repository_dispatch' }}
-#        env:
-#          COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
-#          CHROME_RUNNER_VERSION: ${{ github.event.client_payload.chrome_runner_version }}
-#          FIREFOX_RUNNER_VERSION: ${{ github.event.client_payload.firefox_runner_version }}
-#          DELEGATOR_VERSION: ${{ github.event.client_payload.delegator_version }}
-#          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
-#        run: |
-#          rm -f image-versions.env
-#          echo "COMPILER_VERSION=$COMPILER_VERSION" >> image-versions.env
-#          echo "CHROME_RUNNER_VERSION=$CHROME_RUNNER_VERSION" >> image-versions.env
-#          echo "FIREFOX_RUNNER_VERSION=$FIREFOX_RUNNER_VERSION" >> image-versions.env
-#          echo "DELEGATOR_VERSION=$DELEGATOR_VERSION" >> image-versions.env
-#          echo "WORKER_VERSION=$WORKER_VERSION" >> image-versions.env
-#
-#      - name: Create release
-#        if: ${{ github.event_name == 'repository_dispatch' }}
-#        uses: marvinpinto/action-automatic-releases@latest
-#        with:
-#          repo_token: ${{ secrets.GITHUB_TOKEN }}
-#          draft: false
-#          prerelease: false
-#          automatic_release_tag: ${{ github.event.client_payload.worker_version }}
-#          title: ${{ steps.title.outputs.value }}
-#          files: |
-#            image-versions.env
-#
-#      - name: Remove release-created image-versions.env
-#        if: ${{ github.event_name == 'repository_dispatch' }}
-#        run: |
-#          rm -f image-versions.env
-#
-#      - name: Build image versions url
-#        id: image-versions-url
-#        env:
-#          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
-#          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
-#          VERSION: ${{ steps.version.outputs.value }}
-#        run: |
-#          URL=$(./ci/create-image-versions-url.sh)
-#          if [ $? -ne 0 ]; then
-#            echo "Failed to build image versions url"
-#            exit 1
-#          fi
-#
-#          echo "::set-output name=value::$URL"
-#
-#      - name: Store image versions
-#        env:
-#          URL: ${{ steps.image-versions-url.outputs.value }}
-#          IMAGE_VERSIONS_PATH: ./local.image-versions.env
-#        run: ./ci/store-image-versions.sh
-#
-#      - name: Get versions from local.image-versions.env
-#        id: image-versions
-#        env:
-#          IMAGE_VERSIONS_PATH: ./local.image-versions.env
-#        run: ./ci/read-image-versions.sh
-#
-#      - name: Output image versions
-#        env:
-#          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-#          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-#          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-#          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-#          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-#        run: |
-#          echo COMPILER_VERSION $COMPILER_VERSION
-#          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
-#          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
-#          echo DELEGATOR_VERSION $DELEGATOR_VERSION
-#          echo WORKER_VERSION $WORKER_VERSION
-#
-#      - name: Set snapshot name
-#        id: snapshot_name
-#        env:
-#          EVENT_NAME: ${{ github.event_name }}
-#          PR_NUMBER: ${{ github.event.number }}
-#          RELEASE_TAG_NAME: ${{ steps.version.outputs.value }}
-#        run: ./ci/create-snapshot-name.sh
-#
-#      - name: Verify snapshot name
-#        run: echo ${{ steps.snapshot_name.outputs.value }}
-#
-#      - name: Install packer
-#        run: |
-#          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-#          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-#          sudo apt-get update && sudo apt-get install packer
-#
-#      - name: Verify packer installation
-#        run: |
-#          packer --version
-#          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
-#
-#      - name: Verify image configuration
-#        env:
-#          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-#          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
-#          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-#          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-#          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-#          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-#          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-#        run: packer validate image.pkr.hcl
-#
-#      - name: Create snapshot
-#        id: snapshot
-#        env:
-#          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-#          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
-#          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-#          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-#          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-#          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-#          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-#        run: |
-#          packer build image.pkr.hcl | tee packer.log
-#          ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
-#          echo "::set-output name=id::$ID"
-#
-#      - name: Verify snapshot exists
-#        env:
-#          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-#          ID: ${{ steps.snapshot.outputs.id }}
-#        run: ./ci/verify-snapshot-exists.sh
-#
-#      - name: Remove snapshot if not a release
-#        if: ${{ github.event_name != 'repository_dispatch' && github.event_name != 'release' }}
-#        env:
-#          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-#          ID: ${{ steps.snapshot.outputs.id }}
-#        run: |
-#          ./ci/delete-snapshot.sh
-#          ./ci/verify-snapshot-not-exists.sh
-#          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
-#
-#      - name: Repository Dispatch
-#        if: ${{ steps.version.outputs.value != 'master' }}
-#        uses: peter-evans/repository-dispatch@v1
-#        with:
-#          token: ${{ secrets.WORKER_MANAGER_TOKEN }}
-#          repository: smartassert/worker-manager
-#          event-type: worker-release
-#          client-payload: '{"worker_image": "${{ steps.snapshot.outputs.id }}"}'
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Set is release
         id: is_release
         env:
-          FOO: ${{ github.event_name == 'repository_dispatch' || github.event_name == 'release' }}
-        run: |
-          echo $FOO
-          echo "::set-output name=value::$FOO"
+          IS_RELEASE: ${{ github.event_name == 'repository_dispatch' || github.event_name == 'release' }}
+        run: echo "::set-output name=value::$IS_RELEASE"
 
-      - name: Output is_release
+      - name: Set version
+        id: version
         env:
-          BAR: ${{ steps.is_release.outputs.value }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
         run: |
-          echo "pre"
-          echo $BAR
-          echo "post"
+          VERSION_LABEL=$(./ci/create-version-label.sh)
+          echo "::set-output name=value::$VERSION_LABEL"
 
-      - name: Conditional on is_release is true
-        if: ${{ steps.is_release.outputs.value == 'true' }}
+      - name: Create release title
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        id: title
+        env:
+          VERSION: ${{ github.event.client_payload.worker_version }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
-          echo "is_release is true"
+          echo EVENT_NAME $EVENT_NAME
+          echo "::set-output name=value::Automatic release $VERSION"
 
-      - name: Conditional on is_release is false
+      - name: Create image-versions.env for release
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        env:
+          COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
+          CHROME_RUNNER_VERSION: ${{ github.event.client_payload.chrome_runner_version }}
+          FIREFOX_RUNNER_VERSION: ${{ github.event.client_payload.firefox_runner_version }}
+          DELEGATOR_VERSION: ${{ github.event.client_payload.delegator_version }}
+          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
+        run: |
+          rm -f image-versions.env
+          echo "COMPILER_VERSION=$COMPILER_VERSION" >> image-versions.env
+          echo "CHROME_RUNNER_VERSION=$CHROME_RUNNER_VERSION" >> image-versions.env
+          echo "FIREFOX_RUNNER_VERSION=$FIREFOX_RUNNER_VERSION" >> image-versions.env
+          echo "DELEGATOR_VERSION=$DELEGATOR_VERSION" >> image-versions.env
+          echo "WORKER_VERSION=$WORKER_VERSION" >> image-versions.env
+
+      - name: Create release
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          draft: false
+          prerelease: false
+          automatic_release_tag: ${{ github.event.client_payload.worker_version }}
+          title: ${{ steps.title.outputs.value }}
+          files: |
+            image-versions.env
+
+      - name: Remove release-created image-versions.env
+        if: ${{ github.event_name == 'repository_dispatch' }}
+        run: |
+          rm -f image-versions.env
+
+      - name: Build image versions url
+        id: image-versions-url
+        env:
+          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
+          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          URL=$(./ci/create-image-versions-url.sh)
+          if [ $? -ne 0 ]; then
+            echo "Failed to build image versions url"
+            exit 1
+          fi
+
+          echo "::set-output name=value::$URL"
+
+      - name: Store image versions
+        env:
+          URL: ${{ steps.image-versions-url.outputs.value }}
+          IMAGE_VERSIONS_PATH: ./local.image-versions.env
+        run: ./ci/store-image-versions.sh
+
+      - name: Get versions from local.image-versions.env
+        id: image-versions
+        env:
+          IMAGE_VERSIONS_PATH: ./local.image-versions.env
+        run: ./ci/read-image-versions.sh
+
+      - name: Output image versions
+        env:
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: |
+          echo COMPILER_VERSION $COMPILER_VERSION
+          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
+          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
+          echo DELEGATOR_VERSION $DELEGATOR_VERSION
+          echo WORKER_VERSION $WORKER_VERSION
+
+      - name: Set snapshot name
+        id: snapshot_name
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.number }}
+          RELEASE_TAG_NAME: ${{ steps.version.outputs.value }}
+        run: ./ci/create-snapshot-name.sh
+
+      - name: Verify snapshot name
+        run: echo ${{ steps.snapshot_name.outputs.value }}
+
+      - name: Install packer
+        run: |
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install packer
+
+      - name: Verify packer installation
+        run: |
+          packer --version
+          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
+
+      - name: Verify image configuration
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: packer validate image.pkr.hcl
+
+      - name: Create snapshot
+        id: snapshot
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: |
+          packer build image.pkr.hcl | tee packer.log
+          ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
+          echo "::set-output name=id::$ID"
+
+      - name: Verify snapshot exists
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          ID: ${{ steps.snapshot.outputs.id }}
+        run: ./ci/verify-snapshot-exists.sh
+
+      - name: Remove snapshot if not a release
         if: ${{ steps.is_release.outputs.value == 'false' }}
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          ID: ${{ steps.snapshot.outputs.id }}
         run: |
-          echo "is_release is false"
+          ./ci/delete-snapshot.sh
+          ./ci/verify-snapshot-not-exists.sh
+          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
+
+      - name: Emit worker-deploy repository dispatch event
+#        if: ${{ steps.is_release.outputs.value == 'true' }}
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.WORKER_MANAGER_TOKEN }}
+          repository: smartassert/worker-manager
+          event-type: worker-deploy
+          client-payload: '{"worker_image": "${{ steps.snapshot.outputs.id }}"}'
