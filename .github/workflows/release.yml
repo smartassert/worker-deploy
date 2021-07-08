@@ -186,7 +186,7 @@ jobs:
 #          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
 
       - name: Emit worker-deploy repository dispatch event
-        if: ${{ steps.is_release.outputs.value == 'true' }}
+#        if: ${{ steps.is_release.outputs.value == 'true' }}
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.WORKER_MANAGER_TOKEN }}
