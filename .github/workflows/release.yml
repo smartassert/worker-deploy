@@ -94,8 +94,8 @@ jobs:
       - name: Get versions from local.image-versions.env
         id: image-versions
         env:
-          IMAGE_VERSIONS_PATH: ./local.image-versions.env
-        run: ./ci/read-image-versions.sh
+          ENV_FILE_PATH: ./local.image-versions.env
+        run: ./ci/read-env-file.sh
 
       - name: Output image versions
         env:
