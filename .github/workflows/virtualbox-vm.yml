@@ -21,11 +21,11 @@ jobs:
         id: version
         run: echo "::set-output name=value::master"
 
-      - name: Get versions from checked out image-versions.env
+      - name: Get versions from image-versions.env
         id: image-versions
         env:
-          IMAGE_VERSIONS_PATH: ./image-versions.env
-        run: ./ci/read-image-versions.sh
+          ENV_FILE_PATH: ./image-versions.env
+        run: ./ci/read-env-file.sh
 
       - name: Output image versions
         env:
