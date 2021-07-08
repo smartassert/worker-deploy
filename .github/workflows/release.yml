@@ -191,7 +191,7 @@ jobs:
       - name: Set is release
         id: is_release
         env:
-          FOO: ${{ github.event_name != 'repository_dispatch' && github.event_name != 'release' }}
+          FOO: ${{ github.event_name == 'repository_dispatch' || github.event_name == 'release' }}
         run: |
           echo $FOO
           echo "::set-output name=value::$FOO"
