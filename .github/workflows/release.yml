@@ -161,15 +161,20 @@ jobs:
         run: |
           packer build image.pkr.hcl | tee packer.log
           ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
-          ./ci/verify-snapshot-exists.sh $ID ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           echo "::set-output name=id::$ID"
-          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
 
-      - name: Remove created image if not a release
+      - name: Verify snapshot exists
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          ID: ${{ steps.snapshot.outputs.id }}
+        run: ./ci/verify-snapshot-exists.sh
+
+      - name: Remove snapshot if not a release
         if: ${{ github.event_name != 'repository_dispatch' && github.event_name != 'release' }}
         env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           ID: ${{ steps.snapshot.outputs.id }}
         run: |
-          ./ci/delete-snapshot.sh $ID ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-          ./ci/verify-snapshot-not-exists.sh $ID ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          ./ci/delete-snapshot.sh
+          ./ci/verify-snapshot-not-exists.sh
           if [ $? -ne 0 ]; then exit 1; fi; exit 0;
