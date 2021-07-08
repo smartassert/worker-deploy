@@ -7,4 +7,4 @@ do
     value=$(echo $line | cut -d'=' -f2)
     echo "::set-output name=$key::$value"
   fi
-done < $IMAGE_VERSIONS_PATH
+done < $ENV_FILE_PATH

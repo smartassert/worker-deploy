@@ -37,17 +37,7 @@ jobs:
           VERSION_LABEL=$(./ci/create-version-label.sh)
           echo "::set-output name=value::$VERSION_LABEL"
 
-      - name: Create release title
-        if: ${{ github.event_name == 'repository_dispatch' }}
-        id: title
-        env:
-          VERSION: ${{ github.event.client_payload.worker_version }}
-          EVENT_NAME: ${{ github.event_name }}
-        run: |
-          echo EVENT_NAME $EVENT_NAME
-          echo "::set-output name=value::Automatic release $VERSION"
-
-      - name: Create image-versions.env for release
+      - name: Override image-versions.env for release creation
         if: ${{ github.event_name == 'repository_dispatch' }}
         env:
           COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
@@ -71,41 +61,13 @@ jobs:
           draft: false
           prerelease: false
           automatic_release_tag: ${{ github.event.client_payload.worker_version }}
-          title: ${{ steps.title.outputs.value }}
-          files: |
-            image-versions.env
+          title: "Automatic release ${{ steps.version.outputs.value }}"
 
-      - name: Remove release-created image-versions.env
-        if: ${{ github.event_name == 'repository_dispatch' }}
-        run: |
-          rm -f image-versions.env
-
-      - name: Build image versions url
-        id: image-versions-url
-        env:
-          ASSERT_URL_TEMPLATE: https://github.com/smartassert/worker-deploy/releases/download/{{ version }}/image-versions.env
-          SOURCE_URL_TEMPLATE: https://raw.githubusercontent.com/smartassert/worker-deploy/{{ version }}/image-versions.env
-          VERSION: ${{ steps.version.outputs.value }}
-        run: |
-          URL=$(./ci/create-image-versions-url.sh)
-          if [ $? -ne 0 ]; then
-            echo "Failed to build image versions url"
-            exit 1
-          fi
-
-          echo "::set-output name=value::$URL"
-
-      - name: Store image versions
-        env:
-          URL: ${{ steps.image-versions-url.outputs.value }}
-          IMAGE_VERSIONS_PATH: ./local.image-versions.env
-        run: ./ci/store-image-versions.sh
-
-      - name: Get versions from local.image-versions.env
+      - name: Get versions from image-versions.env
         id: image-versions
         env:
-          IMAGE_VERSIONS_PATH: ./local.image-versions.env
-        run: ./ci/read-image-versions.sh
+          ENV_FILE_PATH: ./image-versions.env
+        run: ./ci/read-env-file.sh
 
       - name: Output image versions
         env:
