@@ -190,6 +190,6 @@ jobs:
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.WORKER_MANAGER_TOKEN }}
-          repository: smartassert/worker-manager-deploy
+          repository: smartassert/worker-manager
           event-type: worker-deploy
           client-payload: '{"worker_image": "${{ steps.snapshot.outputs.id }}"}'
