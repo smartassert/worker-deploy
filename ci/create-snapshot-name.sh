@@ -24,4 +24,4 @@ else
   exit $EXIT_CODE_INVALID_EVENT
 fi
 
-echo "::set-output name=value::${SUFFIX}"
+echo "$SUFFIX"
