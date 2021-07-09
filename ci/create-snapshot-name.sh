@@ -18,9 +18,7 @@ if [ $EVENT_NAME = "push" ]; then
   SUFFIX="master"
 elif [ $EVENT_NAME = "pull_request" ]; then
   SUFFIX="pull-request-${PR_NUMBER}"
-elif [ $EVENT_NAME = "release" ]; then
-  SUFFIX="release-$(echo $RELEASE_TAG_NAME | tr -d '"')"
-elif [ $EVENT_NAME = "repository_dispatch" ]; then
+elif [ $EVENT_NAME = "release" ] || [ $EVENT_NAME = "repository_dispatch" ]; then
   SUFFIX="release-$(echo $RELEASE_TAG_NAME | tr -d '"')"
 else
   exit $EXIT_CODE_INVALID_EVENT
