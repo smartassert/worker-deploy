@@ -10,8 +10,6 @@ on:
   release:
     types:
       - published
-  repository_dispatch:
-    types: [worker-release]
 
 jobs:
   build:
@@ -25,43 +23,15 @@ jobs:
       - name: Set is release
         id: is_release
         env:
-          IS_RELEASE: ${{ github.event_name == 'repository_dispatch' || github.event_name == 'release' }}
+          IS_RELEASE: ${{ github.event_name == 'release' }}
         run: echo "::set-output name=value::$IS_RELEASE"
 
       - name: Set version
         id: version
         env:
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
-          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
         run: |
-          VERSION_LABEL=$(./ci/create-version-label.sh)
-          echo "::set-output name=value::$VERSION_LABEL"
-
-      - name: Override image-versions.env for release creation
-        if: ${{ github.event_name == 'repository_dispatch' }}
-        env:
-          COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
-          CHROME_RUNNER_VERSION: ${{ github.event.client_payload.chrome_runner_version }}
-          FIREFOX_RUNNER_VERSION: ${{ github.event.client_payload.firefox_runner_version }}
-          DELEGATOR_VERSION: ${{ github.event.client_payload.delegator_version }}
-          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
-        run: |
-          rm -f image-versions.env
-          echo "COMPILER_VERSION=$COMPILER_VERSION" >> image-versions.env
-          echo "CHROME_RUNNER_VERSION=$CHROME_RUNNER_VERSION" >> image-versions.env
-          echo "FIREFOX_RUNNER_VERSION=$FIREFOX_RUNNER_VERSION" >> image-versions.env
-          echo "DELEGATOR_VERSION=$DELEGATOR_VERSION" >> image-versions.env
-          echo "WORKER_VERSION=$WORKER_VERSION" >> image-versions.env
-
-      - name: Create release
-        if: ${{ github.event_name == 'repository_dispatch' }}
-        uses: marvinpinto/action-automatic-releases@latest
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          draft: false
-          prerelease: false
-          automatic_release_tag: ${{ github.event.client_payload.worker_version }}
-          title: "Automatic release ${{ steps.version.outputs.value }}"
+          [[ ! -z "$RELEASE_TAG_NAME" ]] && echo "::set-output name=value::$RELEASE_TAG_NAME" || echo "::set-output name=value::master"
 
       - name: Get versions from image-versions.env
         id: image-versions
