@@ -15,11 +15,13 @@ EXIT_CODE_INVALID_EVENT=1
 # EVENT_NAME='repository_dispatch' RELEASE_TAG_NAME='0.4.12' ./create-snapshot-name.sh
 
 if [ $EVENT_NAME = "push" ]; then
-  echo "master"
+  SUFFIX="master"
 elif [ $EVENT_NAME = "pull_request" ]; then
-  echo "pull-request-${PR_NUMBER}"
+  SUFFIX="pull-request-${PR_NUMBER}"
 elif [ $EVENT_NAME = "release" ] || [ $EVENT_NAME = "repository_dispatch" ]; then
-  echo "release-$(echo $RELEASE_TAG_NAME | tr -d '"')"
+  SUFFIX="release-$(echo $RELEASE_TAG_NAME | tr -d '"')"
 else
   exit $EXIT_CODE_INVALID_EVENT
 fi
+
+echo "$SUFFIX"

@@ -20,12 +20,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set is release
-        id: is_release
-        env:
-          IS_RELEASE: ${{ github.event_name == 'release' }}
-        run: echo "::set-output name=value::$IS_RELEASE"
-
       - name: Set version
         id: version
         env:
@@ -59,7 +53,9 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           PR_NUMBER: ${{ github.event.number }}
           RELEASE_TAG_NAME: ${{ steps.version.outputs.value }}
-        run: ./ci/create-snapshot-name.sh
+        run: |
+          SNAPSHOT_NAME=$(./ci/create-snapshot-name.sh)
+          echo "::set-output name=value::$SNAPSHOT_NAME"
 
       - name: Verify snapshot name
         run: echo ${{ steps.snapshot_name.outputs.value }}
@@ -108,7 +104,7 @@ jobs:
         run: ./ci/verify-snapshot-exists.sh
 
       - name: Remove snapshot if not a release
-        if: ${{ steps.is_release.outputs.value == 'false' }}
+        if: ${{ github.event_name != 'release' }}
         env:
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           ID: ${{ steps.snapshot.outputs.id }}
@@ -118,7 +114,7 @@ jobs:
           if [ $? -ne 0 ]; then exit 1; fi; exit 0;
 
       - name: Emit worker-deploy repository dispatch event
-        if: ${{ steps.is_release.outputs.value == 'true' }}
+        if: ${{ github.event_name == 'release' }}
         uses: peter-evans/repository-dispatch@v1
         with:
           token: ${{ secrets.WORKER_MANAGER_TOKEN }}
