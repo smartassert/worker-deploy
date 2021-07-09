@@ -14,8 +14,6 @@ EXIT_CODE_INVALID_EVENT=1
 # repository_dispatch for worker-release
 # EVENT_NAME='repository_dispatch' RELEASE_TAG_NAME='0.4.12' ./create-snapshot-name.sh
 
-TIMESTAMP=$(date --utc +%Y-%m-%dT%H:%M:%SZ)
-
 if [ $EVENT_NAME = "push" ]; then
   SUFFIX="master"
 elif [ $EVENT_NAME = "pull_request" ]; then
@@ -28,4 +26,4 @@ else
   exit $EXIT_CODE_INVALID_EVENT
 fi
 
-echo "::set-output name=value::${TIMESTAMP}-${SUFFIX}"
+echo "::set-output name=value::${SUFFIX}"
