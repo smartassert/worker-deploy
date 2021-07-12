@@ -53,4 +53,4 @@ jobs:
           draft: false
           prerelease: false
           automatic_release_tag: ${{ github.event.client_payload.worker_version }}
-          title: "Automatic release ${{ steps.version.outputs.value }}"
+          title: "Automatic release ${{ github.event.client_payload.worker_version }}"
