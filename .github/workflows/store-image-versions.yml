@@ -69,7 +69,7 @@ jobs:
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
         run: |
-          rm release-notes.md
+          rm -f release-notes.md
           echo "- compiler: $COMPILER_VERSION" >> release-notes.md
           echo "- chrome runner: $CHROME_RUNNER_VERSION" >> release-notes.md
           echo "- firefox runner: $FIREFOX_RUNNER_VERSION" >> release-notes.md
