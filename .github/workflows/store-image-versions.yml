@@ -46,12 +46,26 @@ jobs:
         with:
           commit_message: "Automatic image-versions.env for worker release ${{ github.event.client_payload.worker_version }}"
 
-      - name: Create release
-        uses: marvinpinto/action-automatic-releases@latest
+      - name: Get latest commit hash
+        id: commit_hash
         if: ${{ steps.update.outputs.has_changes == 'true' }}
-        with:
-          repo_token: ${{ secrets.PAT_TOKEN_SELF }}
-          draft: false
-          prerelease: false
-          automatic_release_tag: ${{ github.event.client_payload.worker_version }}
-          title: "Automatic release ${{ github.event.client_payload.worker_version }}"
+        run: |
+          COMMIT_HASH=$(git rev-parse HEAD)
+          echo "::set-output name=value::$COMMIT_HASH"
+
+      - name: Create release notes
+        id: release_notes
+        run: |
+          NOTES=$(cat image-versions.env)
+          echo "::set-output name=value::$NOTES"
+
+      - name: Create release
+        if: ${{ steps.update.outputs.has_changes == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
+          TAG: ${{ github.event.client_payload.worker_version }}
+          TARGET: ${{ steps.commit_hash.outputs.value }}
+          TITLE: "Automatic release ${{ github.event.client_payload.worker_version }}"
+          NOTES: ${{ steps.release_notes.outputs.value. }}
+        run: |
+          gh release create $TAG --target $TARGET --title $TITLE --notes $NOTES
