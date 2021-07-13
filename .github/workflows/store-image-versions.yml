@@ -66,6 +66,6 @@ jobs:
           TAG: ${{ github.event.client_payload.worker_version }}
           TARGET: ${{ steps.commit_hash.outputs.value }}
           TITLE: "Automatic release ${{ github.event.client_payload.worker_version }}"
-          NOTES: ${{ steps.release_notes.outputs.value. }}
+          NOTES: ${{ steps.release_notes.outputs.value }}
         run: |
           gh release create $TAG --target $TARGET --title $TITLE --notes $NOTES
