@@ -68,4 +68,4 @@ jobs:
           TITLE: "Automatic release ${{ github.event.client_payload.worker_version }}"
           NOTES: ${{ steps.release_notes.outputs.value }}
         run: |
-          gh release create $TAG --target $TARGET --title $TITLE --notes $NOTES
+          gh release create $TAG --target $TARGET --title "$TITLE" --notes "$NOTES"
