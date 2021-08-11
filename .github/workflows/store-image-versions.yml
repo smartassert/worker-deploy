@@ -16,6 +16,7 @@ jobs:
           token: ${{ secrets.PAT_TOKEN_SELF }}
 
       - name: Update image-versions.env
+        if: ${{ github.event.client_payload.worker_version != 'master' }}
         id: update
         env:
           COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
