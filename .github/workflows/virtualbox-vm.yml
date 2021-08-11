@@ -64,6 +64,7 @@ jobs:
 
       - name: Vagrant up
         env:
+          VAGRANT_DISABLE_VBOXSYMLINKCREATE: 1
           HOST_PORT: 80
           COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
           CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}

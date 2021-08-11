@@ -6,6 +6,8 @@ delegator_version = ENV["DELEGATOR_VERSION"]
 worker_version = ENV["WORKER_VERSION"]
 
 Vagrant.configure("2") do |config|
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+
   config.vm.define "basil_worker" do |basil_worker|
     basil_worker.vm.box = "focal-server-cloudimg-amd64-vagrant"
     basil_worker.vm.box_url = "https://cloud-images.ubuntu.com/focal/current/focal-server-cloudimg-amd64-vagrant.box"
