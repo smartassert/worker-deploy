@@ -15,6 +15,11 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN_SELF }}
 
+      - name: Output payload
+        env:
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: echo "$PAYLOAD"
+
       - name: Update image-versions.env
         if: ${{ github.event.client_payload.worker_version != 'master' }}
         id: update
