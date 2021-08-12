@@ -12,9 +12,11 @@ on:
       - published
 
 jobs:
-  build:
-    name: Release
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
 
     steps:
       - name: Checkout
@@ -26,6 +28,15 @@ jobs:
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
           [[ ! -z "$RELEASE_TAG_NAME" ]] && echo "::set-output name=value::$RELEASE_TAG_NAME" || echo "::set-output name=value::master"
+
+  build:
+    needs: setup
+    name: Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Get versions from image-versions.env
         id: image-versions
@@ -52,7 +63,7 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           PR_NUMBER: ${{ github.event.number }}
-          RELEASE_TAG_NAME: ${{ steps.version.outputs.value }}
+          RELEASE_TAG_NAME: ${{ needs.setup.outputs.version }}
         run: |
           SNAPSHOT_NAME=$(./ci/create-snapshot-name.sh)
           echo "::set-output name=value::$SNAPSHOT_NAME"
