@@ -59,36 +59,13 @@ jobs:
           COMMIT_HASH=$(git rev-parse HEAD)
           echo "::set-output name=value::$COMMIT_HASH"
 
-      - name: Get versions from image-versions.env
-        id: image-versions
-        env:
-          ENV_FILE_PATH: ./image-versions.env
-        run: ./ci/read-env-file.sh
-
-      - name: Create release notes
+      - name: Trigger create-release workflow if there are changes
         if: ${{ steps.update.outputs.has_changes == 'true' }}
-        id: release_notes
-        env:
-          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: |
-          rm -f release-notes.md
-          echo "- compiler: $COMPILER_VERSION" >> release-notes.md
-          echo "- chrome runner: $CHROME_RUNNER_VERSION" >> release-notes.md
-          echo "- firefox runner: $FIREFOX_RUNNER_VERSION" >> release-notes.md
-          echo "- delegator: $DELEGATOR_VERSION" >> release-notes.md
-          echo "- worker: $WORKER_VERSION" >> release-notes.md
-
-      - name: Create release
-        if: ${{ steps.update.outputs.has_changes == 'true' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
-          TAG: ${{ github.event.client_payload.worker_version }}
-          TARGET: ${{ steps.commit_hash.outputs.value }}
-          TITLE: "Automatic release ${{ github.event.client_payload.worker_version }}"
-          NOTES: ${{ steps.release_notes.outputs.value }}
-        run: |
-          gh release create $TAG --target $TARGET --title "$TITLE" --notes-file ./release-notes.md
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Create release
+          token: ${{ secrets.PAT_TOKEN_SELF }}
+          inputs: |
+            {
+              "commit_hash": "${{ steps.commit_hash.outputs.value }}"
+            }
