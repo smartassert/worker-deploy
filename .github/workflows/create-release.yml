@@ -1,0 +1,48 @@
+name: Create release
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_hash:
+        description: Commit hash to release from
+        required: true
+
+jobs:
+  create-release:
+    name: Create release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.client_payload.commit_hash }}
+
+      - name: Get versions from image-versions.env
+        id: image-versions
+        env:
+          ENV_FILE_PATH: ./image-versions.env
+        run: ./ci/read-env-file.sh
+
+      - name: Set release notes path
+        id: release-notes-path
+        run: echo "::set-output name=value::release-notes.md"
+
+      - name: Create release notes
+        env:
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+          RELEASE_NOTES_PATH: ${{ steps.release-notes-path.outputs.value }}
+        run: ./create-release-notes.sh
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
+          TAG: ${{ github.event.client_payload.worker_version }}
+          TARGET: ${{ steps.commit_hash.outputs.value }}
+          TITLE: "Automatic release ${{ github.event.client_payload.worker_version }}"
+          NOTES_FILE: ${{ steps.release-notes-path.outputs.value }}
+        run: gh release create $TAG --target $TARGET --title "$TITLE" --notes-file $NOTES_FILE
