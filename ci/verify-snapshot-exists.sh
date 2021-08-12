@@ -5,7 +5,7 @@ EXIT_CODE_SNAPSHOT_ID_MISSING=2
 EXIT_CODE_SNAPSHOT_ID_INCORRECT=3
 
 AUTH_HEADER="Authorization: Bearer ${DIGITALOCEAN_API_TOKEN}"
-URL="https://api.digitalocean.com/v2/snapshots/${ID}"
+URL="https://api.digitalocean.com/v2/snapshots/${IMAGE_ID}"
 
 RESPONSE_JSON=$(curl -s -X GET -H 'Content-Type: application/json' -H "${AUTH_HEADER}" "${URL}")
 
@@ -20,10 +20,10 @@ if [ $SNAPSHOT_JSON_HAS_ID != "true" ]; then
 fi
 
 RESPONSE_ID=$(echo $RESPONSE_JSON | jq '.snapshot.id')
-EXPECTED_RESPONSE_ID="\"${ID}\""
+EXPECTED_RESPONSE_ID="\"${IMAGE_ID}\""
 
 if [ $RESPONSE_ID != $EXPECTED_RESPONSE_ID ]; then
   exit $EXIT_CODE_SNAPSHOT_ID_INCORRECT
 fi
 
-echo "Snapshot ${ID} exists ✓"
+echo "Snapshot ${IMAGE_ID} exists ✓"
