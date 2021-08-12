@@ -22,7 +22,6 @@ jobs:
 
       - name: Update image-versions.env
         if: ${{ github.event.client_payload.worker_version != 'master' }}
-        id: update
         env:
           COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
           CHROME_RUNNER_VERSION: ${{ github.event.client_payload.chrome_runner_version }}
@@ -30,7 +29,6 @@ jobs:
           DELEGATOR_VERSION: ${{ github.event.client_payload.delegator_version }}
           WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
         run: |
-          cp image-versions.env image-versions.old
           rm -f image-versions.env
           echo "COMPILER_VERSION=$COMPILER_VERSION" >> image-versions.env
           echo "CHROME_RUNNER_VERSION=$CHROME_RUNNER_VERSION" >> image-versions.env
@@ -38,34 +36,24 @@ jobs:
           echo "DELEGATOR_VERSION=$DELEGATOR_VERSION" >> image-versions.env
           echo "WORKER_VERSION=$WORKER_VERSION" >> image-versions.env
 
-          if cmp --quiet image-versions.env image-versions.old ; then
-            echo "::set-output name=has_changes::false"
-          else
-            echo "::set-output name=has_changes::true"
-          fi
-
-          rm image-versions.old
-
       - name: Commit changes
-        if: ${{ steps.update.outputs.has_changes == 'true' }}
+        id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Automatic image-versions.env for worker release ${{ github.event.client_payload.worker_version }}"
 
       - name: Get latest commit hash
-        id: commit_hash
-        if: ${{ steps.update.outputs.has_changes == 'true' }}
-        run: |
-          COMMIT_HASH=$(git rev-parse HEAD)
-          echo "::set-output name=value::$COMMIT_HASH"
+        id: commit-hash
+        if: ${{ steps.auto-commit-action.outputs.changes_detected == 'true' }}
+        run: echo "::set-output name=value::$(git rev-parse HEAD)"
 
-      - name: Trigger create-release workflow if there are changes
-        if: ${{ steps.update.outputs.has_changes == 'true' }}
+      - name: Trigger create-release workflow
+        if: ${{ steps.auto-commit-action.outputs.changes_detected == 'true' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Create release
           token: ${{ secrets.PAT_TOKEN_SELF }}
           inputs: |
             {
-              "commit_hash": "${{ steps.commit_hash.outputs.value }}"
+              "commit_hash": "${{ steps.commit-hash.outputs.value }}"
             }
