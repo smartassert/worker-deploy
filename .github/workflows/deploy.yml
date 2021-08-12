@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_id:
+        description: Image ID
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dispatch worker-deploy event to smartassert/worker-manager
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.WORKER_MANAGER_TOKEN }}
+          repository: smartassert/worker-manager
+          event-type: worker-deploy
+          client-payload: |
+            {
+              "worker_image": "${{ github.event.client_payload.image_id }}"
+            }

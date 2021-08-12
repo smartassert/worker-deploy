@@ -67,9 +67,7 @@ jobs:
           sudo apt-get update && sudo apt-get install packer
 
       - name: Verify packer installation
-        run: |
-          packer --version
-          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
+        run: packer --version
 
       - name: Verify image configuration
         env:
@@ -111,13 +109,14 @@ jobs:
         run: |
           ./ci/delete-snapshot.sh
           ./ci/verify-snapshot-not-exists.sh
-          if [ $? -ne 0 ]; then exit 1; fi; exit 0;
 
-      - name: Emit worker-deploy repository dispatch event
+      - name: Trigger deploy workflow if this a release
         if: ${{ github.event_name == 'release' }}
-        uses: peter-evans/repository-dispatch@v1
+        uses: benc-uk/workflow-dispatch@v1
         with:
-          token: ${{ secrets.WORKER_MANAGER_TOKEN }}
-          repository: smartassert/worker-manager
-          event-type: worker-deploy
-          client-payload: '{"worker_image": "${{ steps.snapshot.outputs.id }}"}'
+          workflow: Deploy
+          token: ${{ secrets.PAT_TOKEN_SELF }}
+          inputs: |
+            {
+              "image_id": "${{ steps.snapshot.outputs.id }}"
+            }
