@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.value }}
+      snapshot-name: ${{ steps.snapshot-name.outputs.value }}
 
     steps:
       - name: Checkout
@@ -29,12 +30,27 @@ jobs:
         run: |
           [[ ! -z "$RELEASE_TAG_NAME" ]] && echo "::set-output name=value::$RELEASE_TAG_NAME" || echo "::set-output name=value::master"
 
+      - name: Output version
+        run: echo ${{ steps.version.outputs.value }}
+
+      - name: Set snapshot name
+        id: snapshot-name
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.number }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: echo "::set-output name=value::$(./ci/create-snapshot-name.sh)"
+
+      - name: Verify snapshot name
+        run: echo ${{ steps.snapshot-name.outputs.value }}
+
   release:
     needs: setup
     name: Release
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.setup.outputs.version }}
+      SNAPSHOT_NAME: ${{ needs.setup.outputs.snapshot-name }}
 
     steps:
       - name: Checkout
@@ -60,43 +76,29 @@ jobs:
           echo DELEGATOR_VERSION $DELEGATOR_VERSION
           echo WORKER_VERSION $WORKER_VERSION
 
-      - name: Set snapshot name
-        id: snapshot_name
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_NUMBER: ${{ github.event.number }}
+      - name: Install packer
         run: |
-          SNAPSHOT_NAME=$(./ci/create-snapshot-name.sh)
-          echo "::set-output name=value::$SNAPSHOT_NAME"
+          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+          sudo apt-get update && sudo apt-get install packer
 
-      - name: Verify snapshot name
-        run: echo ${{ steps.snapshot_name.outputs.value }}
+      - name: Verify packer installation
+        run: packer --version
 
-#      - name: Install packer
-#        run: |
-#          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-#          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-#          sudo apt-get update && sudo apt-get install packer
-#
-#      - name: Verify packer installation
-#        run: packer --version
-#
-#      - name: Verify image configuration
-#        env:
-#          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-#          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
-#          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-#          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-#          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-#          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-#          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-#        run: packer validate image.pkr.hcl
+      - name: Verify image configuration
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+        run: packer validate image.pkr.hcl
 #
 #      - name: Create snapshot
 #        id: snapshot
 #        env:
 #          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-#          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
 #          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
 #          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
 #          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
