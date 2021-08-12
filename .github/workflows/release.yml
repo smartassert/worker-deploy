@@ -74,6 +74,7 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     env:
+      DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
       VERSION: ${{ needs.setup.outputs.version }}
       SNAPSHOT_NAME: ${{ needs.setup.outputs.snapshot-name }}
       COMPILER_VERSION: ${{ needs.setup.outputs.compiler-version }}
@@ -96,29 +97,21 @@ jobs:
         run: packer --version
 
       - name: Verify image configuration
-        env:
-          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
         run: packer validate image.pkr.hcl
 #
 #      - name: Create snapshot
 #        id: snapshot
-#        env:
-#          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
 #        run: |
 #          packer build image.pkr.hcl | tee packer.log
 #          ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
 #          echo "::set-output name=id::$ID"
 #
 #      - name: Verify snapshot exists
-#        env:
-#          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
 #          ID: ${{ steps.snapshot.outputs.id }}
 #        run: ./ci/verify-snapshot-exists.sh
 #
 #      - name: Remove snapshot if not a release
 #        if: ${{ github.event_name != 'release' }}
-#        env:
-#          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
 #          ID: ${{ steps.snapshot.outputs.id }}
 #        run: |
 #          ./ci/delete-snapshot.sh
