@@ -3,36 +3,71 @@ variable "digitalocean_api_token" {
   type      = string
   sensitive = true
   default = env("DIGITALOCEAN_API_TOKEN")
+
+  validation {
+    condition     = length(var.digitalocean_api_token) > 0
+    error_message = "DigitalOcean API token is required."
+  }
 }
 
 variable "snapshot_name" {
   type = string
   default = env("SNAPSHOT_NAME")
+
+  validation {
+    condition     = length(var.snapshot_name) > 0
+    error_message = "Snapshot name is required."
+  }
 }
 
 variable "compiler_version" {
   type = string
   default = env("COMPILER_VERSION")
+
+  validation {
+    condition     = length(var.compiler_version) > 0
+    error_message = "Compiler version is required."
+  }
 }
 
 variable "chrome_runner_version" {
   type = string
   default = env("CHROME_RUNNER_VERSION")
+
+  validation {
+    condition     = length(var.chrome_runner_version) > 0
+    error_message = "Chrome runner version is required."
+  }
 }
 
 variable "firefox_runner_version" {
   type = string
   default = env("FIREFOX_RUNNER_VERSION")
+
+  validation {
+    condition     = length(var.firefox_runner_version) > 0
+    error_message = "Firefox runner version is required."
+  }
 }
 
 variable "delegator_version" {
   type = string
   default = env("DELEGATOR_VERSION")
+
+  validation {
+    condition     = length(var.delegator_version) > 0
+    error_message = "Delegator version is required."
+  }
 }
 
 variable "worker_version" {
   type = string
   default = env("WORKER_VERSION")
+
+  validation {
+    condition     = length(var.worker_version) > 0
+    error_message = "Worker version is required."
+  }
 }
 
 source "digitalocean" "worker_base" {
