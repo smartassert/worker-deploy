@@ -73,11 +73,17 @@ jobs:
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
           STDERR_FILE: vagrant-up-stderr.txt
-        run: ./.github/workflows/vagrant-up-output-stderr.sh
+        run: |
+          set +e
+
+          STDERR_FILE="vagrant-up-stderr.txt"
+          echo "::set-output name=stderr-file::$STDERR_FILE"
+          vagrant up --no-color basil_worker 2>$STDERR_FILE
+          exit 0
 
       - name: Examine vagrant output for expected failure
         env:
-          STDERR_FILE: vagrant-up-stderr.txt
+          STDERR_FILE: ${{ steps.vagrant-up.outouts.stderr-file }}
         run: |
           CONTENT="$(cat $STDERR_FILE)"
 
