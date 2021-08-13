@@ -14,11 +14,6 @@ jobs:
     runs-on: macos-10.15
 
     steps:
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
-
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -45,6 +40,20 @@ jobs:
           echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
           echo DELEGATOR_VERSION $DELEGATOR_VERSION
           echo WORKER_VERSION $WORKER_VERSION
+
+      - name: Failing step
+        run: |
+          echo "output line 1"
+          echo "output line 2"
+          exit 1
+
+      - name: Debug failure
+        if: ${{ failure() }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          gh run view $RUN_ID --log
 
 #      - name: Show package versions
 #        run: |
