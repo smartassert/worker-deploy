@@ -16,7 +16,7 @@ Vagrant.configure("2") do |config|
       v.name = "basil_worker"
     end
 
-    basil_worker.vm.network "forwarded_port", guest: 80, host: host_port
+    basil_worker.vm.network "forwarded_port_foo", guest: 80, host: host_port
 
     # Copy system files and provision for use
     basil_worker.vm.provision "file", source: "./.env", destination: "~/.env"
