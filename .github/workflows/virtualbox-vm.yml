@@ -53,14 +53,14 @@ jobs:
             ~/.vagrant.d/boxes/focal-server-cloudimg-amd64-vagrant
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
-#      - name: Validate Vagrantfile
-#        run: vagrant validate
-#
-#      - name: Lint provision.sh
-#        run: |
-#          brew install shellcheck
-#          shellcheck provision.sh
-#          shellcheck self-test/*.sh
+      - name: Validate Vagrantfile
+        run: vagrant validate
+
+      - name: Lint provision.sh
+        run: |
+          brew install shellcheck
+          shellcheck provision.sh
+          shellcheck self-test/*.sh
 
       - name: Vagrant up
         id: vagrant-up
@@ -76,8 +76,13 @@ jobs:
           VAGRANT_ERROR_OUTPUT="$(./.github/workflows/vagrant-up.sh 2>&1 > /dev/null)"
           echo "::set-output name=stderr::$VAGRANT_ERROR_OUTPUT"
 
-      - name: Examine vagrant output
+      - name: Examine vagrant output for expected failure
         env:
           VAGRANT_ERROR_OUTPUT: ${{ steps.vagrant-up.outputs.stderr }}
         run: |
-          echo "$VAGRANT_ERROR_OUTPUT"
+          HAS_DOCKER_RATE_LIMIT_ERROR=$(echo "$VAGRANT_ERROR_OUTPUT"| grep "toomanyrequests" | grep -o "docker.com/increase-rate-limit" | wc -l)
+
+          if [0 -eq $HAS_DOCKER_RATE_LIMIT_ERROR]; then
+            echo "$VAGRANT_ERROR_OUTPUT"
+            exit 1
+          fi
