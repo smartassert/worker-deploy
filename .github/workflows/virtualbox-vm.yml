@@ -72,9 +72,7 @@ jobs:
           FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: |
-          VAGRANT_ERROR_OUTPUT="$(./.github/workflows/vagrant-up.sh 2>&1 > /dev/null)"
-          echo "::set-output name=stderr::$VAGRANT_ERROR_OUTPUT"
+        run: echo "::set-output name=stderr::$(./.github/workflows/vagrant-up-output-stderr.sh)"
 
       - name: Examine vagrant output for expected failure
         env:
