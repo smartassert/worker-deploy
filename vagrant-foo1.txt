@@ -1,6 +1,0 @@
-There are errors in the configuration of this machine. Please fix
-the following errors and try again:
-
-vm:
-* Network type 'forwarded_port_foo' is invalid. Please use a valid network type.
-

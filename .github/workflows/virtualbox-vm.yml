@@ -79,10 +79,10 @@ jobs:
         env:
           STDERR_FILE: vagrant-up-stderr.txt
         run: |
-          cat $STDERR_FILE
-          #HAS_DOCKER_RATE_LIMIT_ERROR=$(echo "$VAGRANT_ERROR_OUTPUT"| grep "toomanyrequests" | grep -o "docker.com/increase-rate-limit" | wc -l)
+          CONTENT="$($STDERR_FILE)"
+          ALLOWED_ERROR_COUNT=$(echo $CONTENT | grep "toomanyrequests" | grep -o "docker.com/increase-rate-limit" | wc -l)
 
-          #if [0 -eq $HAS_DOCKER_RATE_LIMIT_ERROR]; then
-          #  echo "$VAGRANT_ERROR_OUTPUT"
-          #  exit 1
-          #fi
+          if [ 0 -eq $ALLOWED_ERROR_COUNT ]; then
+            echo "$CONTENT"
+            exit 1
+          fi
