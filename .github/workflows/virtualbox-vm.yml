@@ -73,7 +73,7 @@ jobs:
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
         run: |
-          VAGRANT_OUTPUT=$(vagrant up basil_worker)
+          VAGRANT_OUTPUT=$(./.github/workflows/vagrant-up.sh)
           echo "::set-output name=value::$VAGRANT_OUTPUT"
 
       - name: Examine vagrant output
