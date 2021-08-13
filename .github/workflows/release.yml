@@ -111,23 +111,15 @@ jobs:
           IMAGE_ID: ${{ steps.image.outputs.id }}
         run: ./ci/verify-snapshot-exists.sh
 
-  teardown:
+  teardown-for-release:
     needs: create-image
-    name: Teardown
+    name: Teardown for release
     runs-on: ubuntu-latest
-    env:
-      DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-      IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
+    if: ${{ github.event_name == 'release' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Remove snapshot if not a release
-        if: ${{ github.event_name != 'release' }}
-        run: |
-          ./ci/delete-snapshot.sh
-          ./ci/verify-snapshot-not-exists.sh
 
       - name: Trigger deploy workflow if this a release
         if: ${{ github.event_name == 'release' }}
@@ -139,3 +131,20 @@ jobs:
             {
               "image_id": "${{ needs.create-image.outputs.image-id }}"
             }
+
+  teardown-for-non-release:
+    needs: create-image
+    name: Teardown for non-release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Remove snapshot if not a release
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
+        run: |
+          ./ci/delete-snapshot.sh
+          ./ci/verify-snapshot-not-exists.sh
