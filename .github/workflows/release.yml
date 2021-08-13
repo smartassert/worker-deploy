@@ -12,9 +12,17 @@ on:
       - published
 
 jobs:
-  build:
-    name: Release
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.value }}
+      snapshot-name: ${{ steps.snapshot-name.outputs.value }}
+      compiler-version: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+      chrome-runner-version: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+      firefox-runner-version: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+      delegator-version: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+      worker-version: ${{ steps.image-versions.outputs.WORKER_VERSION }}
 
     steps:
       - name: Checkout
@@ -26,6 +34,20 @@ jobs:
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: |
           [[ ! -z "$RELEASE_TAG_NAME" ]] && echo "::set-output name=value::$RELEASE_TAG_NAME" || echo "::set-output name=value::master"
+
+      - name: Output version
+        run: echo ${{ steps.version.outputs.value }}
+
+      - name: Set snapshot name
+        id: snapshot-name
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.number }}
+          VERSION: ${{ steps.version.outputs.value }}
+        run: echo "::set-output name=value::$(./ci/create-snapshot-name.sh)"
+
+      - name: Output snapshot name
+        run: echo ${{ steps.snapshot-name.outputs.value }}
 
       - name: Get versions from image-versions.env
         id: image-versions
@@ -47,76 +69,82 @@ jobs:
           echo DELEGATOR_VERSION $DELEGATOR_VERSION
           echo WORKER_VERSION $WORKER_VERSION
 
-      - name: Set snapshot name
-        id: snapshot_name
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          PR_NUMBER: ${{ github.event.number }}
-          RELEASE_TAG_NAME: ${{ steps.version.outputs.value }}
-        run: |
-          SNAPSHOT_NAME=$(./ci/create-snapshot-name.sh)
-          echo "::set-output name=value::$SNAPSHOT_NAME"
+  create-image:
+    needs: setup
+    name: Create image
+    runs-on: ubuntu-latest
+    env:
+      DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+      VERSION: ${{ needs.setup.outputs.version }}
+      SNAPSHOT_NAME: ${{ needs.setup.outputs.snapshot-name }}
+      COMPILER_VERSION: ${{ needs.setup.outputs.compiler-version }}
+      CHROME_RUNNER_VERSION: ${{ needs.setup.outputs.chrome-runner-version }}
+      FIREFOX_RUNNER_VERSION: ${{ needs.setup.outputs.firefox-runner-version }}
+      DELEGATOR_VERSION: ${{ needs.setup.outputs.delegator-version }}
+      WORKER_VERSION: ${{ needs.setup.outputs.worker-version }}
+    outputs:
+      image-id: ${{ steps.image.outputs.id }}
 
-      - name: Verify snapshot name
-        run: echo ${{ steps.snapshot_name.outputs.value }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Install packer
         run: |
           curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
           sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
           sudo apt-get update && sudo apt-get install packer
-
-      - name: Verify packer installation
-        run: packer --version
+          packer --version
 
       - name: Verify image configuration
-        env:
-          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
-          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
         run: packer validate image.pkr.hcl
 
-      - name: Create snapshot
-        id: snapshot
-        env:
-          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-          SNAPSHOT_NAME: ${{ steps.snapshot_name.outputs.value }}
-          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+      - name: Create image
+        id: image
         run: |
           packer build image.pkr.hcl | tee packer.log
           ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
           echo "::set-output name=id::$ID"
 
-      - name: Verify snapshot exists
+      - name: Verify image exists
         env:
-          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-          ID: ${{ steps.snapshot.outputs.id }}
+          IMAGE_ID: ${{ steps.image.outputs.id }}
         run: ./ci/verify-snapshot-exists.sh
 
-      - name: Remove snapshot if not a release
-        if: ${{ github.event_name != 'release' }}
-        env:
-          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
-          ID: ${{ steps.snapshot.outputs.id }}
-        run: |
-          ./ci/delete-snapshot.sh
-          ./ci/verify-snapshot-not-exists.sh
+  trigger-deploy:
+    needs: create-image
+    name: Trigger deploy for release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'release' }}
 
-      - name: Trigger deploy workflow if this a release
-        if: ${{ github.event_name == 'release' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Trigger deploy workflow
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Deploy
           token: ${{ secrets.PAT_TOKEN_SELF }}
           inputs: |
             {
-              "image_id": "${{ steps.snapshot.outputs.id }}"
+              "image_id": "${{ needs.create-image.outputs.image-id }}"
             }
+
+  remove-snapshot:
+    needs: create-image
+    name: Remove snapshot if not a release
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'release' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Remove snapshot if not a release
+        env:
+          DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
+          IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
+        run: |
+          ./ci/delete-snapshot.sh
+          ./ci/verify-snapshot-not-exists.sh
