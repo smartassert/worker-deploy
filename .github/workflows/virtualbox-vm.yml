@@ -72,13 +72,14 @@ jobs:
           FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: echo "::set-output name=stderr::$(./.github/workflows/vagrant-up-output-stderr.sh)"
+          STDERR_FILE: vagrant-up-stderr.txt
+        run: ./.github/workflows/vagrant-up-output-stderr.sh
 
       - name: Examine vagrant output for expected failure
         env:
-          VAGRANT_ERROR_OUTPUT: ${{ steps.vagrant-up.outputs.stderr }}
+          STDERR_FILE: vagrant-up-stderr.txt
         run: |
-          echo "$VAGRANT_ERROR_OUTPUT"
+          cat $STDERR_FILE
           #HAS_DOCKER_RATE_LIMIT_ERROR=$(echo "$VAGRANT_ERROR_OUTPUT"| grep "toomanyrequests" | grep -o "docker.com/increase-rate-limit" | wc -l)
 
           #if [0 -eq $HAS_DOCKER_RATE_LIMIT_ERROR]; then

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-VAGRANT_ERROR_OUTPUT="$(vagrant up basil_worker 2>&1 > /dev/null)"
-echo "$VAGRANT_ERROR_OUTPUT"
+OUTPUT="$(vagrant up --no-color basil_worker 2>$STDERR_FILE)"
+exit 0
