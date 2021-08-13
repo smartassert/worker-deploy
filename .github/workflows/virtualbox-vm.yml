@@ -53,14 +53,14 @@ jobs:
             ~/.vagrant.d/boxes/focal-server-cloudimg-amd64-vagrant
           key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
-#      - name: Validate Vagrantfile
-#        run: vagrant validate
-#
-#      - name: Lint provision.sh
-#        run: |
-#          brew install shellcheck
-#          shellcheck provision.sh
-#          shellcheck self-test/*.sh
+      - name: Validate Vagrantfile
+        run: vagrant validate
+
+      - name: Lint provision.sh
+        run: |
+          brew install shellcheck
+          shellcheck provision.sh
+          shellcheck self-test/*.sh
 
       - name: Vagrant up
         id: vagrant-up
