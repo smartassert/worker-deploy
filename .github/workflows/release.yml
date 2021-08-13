@@ -111,9 +111,9 @@ jobs:
           IMAGE_ID: ${{ steps.image.outputs.id }}
         run: ./ci/verify-snapshot-exists.sh
 
-  teardown-for-release:
+  trigger-deploy:
     needs: create-image
-    name: Teardown for release
+    name: Trigger deploy for release
     runs-on: ubuntu-latest
     if: ${{ github.event_name == 'release' }}
 
@@ -121,8 +121,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Trigger deploy workflow if this a release
-        if: ${{ github.event_name == 'release' }}
+      - name: Trigger deploy workflow
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Deploy
@@ -132,10 +131,11 @@ jobs:
               "image_id": "${{ needs.create-image.outputs.image-id }}"
             }
 
-  teardown-for-non-release:
+  remove-snapshot:
     needs: create-image
-    name: Teardown for non-release
+    name: Remove snapshot if not a release
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'release' }}
 
     steps:
       - name: Checkout
