@@ -10,12 +10,19 @@ on:
   release:
     types:
       - published
+  workflow_dispatch:
+    inputs:
+      should-deploy:
+        description: Deploy after building image?
+        required: true
+        default: "false"
 
 jobs:
   setup:
     name: Setup
     runs-on: ubuntu-latest
     outputs:
+      should-deploy: ${{ steps.should-deploy.outputs.value }}
       version: ${{ steps.version.outputs.value }}
       snapshot-name: ${{ steps.snapshot-name.outputs.value }}
       compiler-version: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
@@ -25,8 +32,17 @@ jobs:
       worker-version: ${{ steps.image-versions.outputs.WORKER_VERSION }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Deploy after building image?
+        id: should-deploy
+        env:
+          INPUT_SHOULD_DEPLOY: ${{ github.event.client_payload.should-deploy }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ $EVENT_NAME = 'release' ] || [ $INPUT_SHOULD_DEPLOY = 'true' ]; then
+            echo "::set-output name=value::true"
+          else
+            echo "::set-output name=value::false"
+          fi
 
       - name: Set version
         id: version
@@ -112,10 +128,10 @@ jobs:
         run: ./ci/verify-snapshot-exists.sh
 
   trigger-deploy:
-    needs: create-image
-    name: Trigger deploy for release
+    needs: [setup, create-image]
+    name: Trigger deploy workflow
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'release' }}
+    if: ${{ needs.setup.outputs.should-deploy == 'true' }}
 
     steps:
       - name: Checkout
@@ -133,15 +149,15 @@ jobs:
 
   remove-snapshot:
     needs: create-image
-    name: Remove snapshot if not a release
+    name: Remove snapshot if not deploying
     runs-on: ubuntu-latest
-    if: ${{ github.event_name != 'release' }}
+    if: ${{ needs.setup.outputs.should-deploy == 'false' }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Remove snapshot if not a release
+      - name: Remove snapshot
         env:
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
