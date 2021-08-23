@@ -41,7 +41,7 @@ jobs:
           INPUT_SHOULD_DEPLOY: ${{ github.event.client_payload.should-deploy }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
-          if [ $EVENT_NAME = 'release' ] || [ $INPUT_SHOULD_DEPLOY = 'true' ]; then
+          if [ $EVENT_NAME = "release" ] || [ $INPUT_SHOULD_DEPLOY = "true" ]; then
             echo "::set-output name=value::true"
           else
             echo "::set-output name=value::false"
