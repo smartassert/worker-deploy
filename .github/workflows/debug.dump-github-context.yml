@@ -6,8 +6,6 @@ on:
       - main
   pull_request:
   release:
-    types:
-      - published
 
 jobs:
   main:
