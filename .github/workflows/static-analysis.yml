@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install ShellCheck
-        run: apt install shellcheck
+        run: sudo apt-get install shellcheck
 
       - name: Run
         run: shellcheck ./scripts/*.sh
