@@ -1,0 +1,22 @@
+name: Static Analysis
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install ShellCheck
+        run: sudo apt-get install shellcheck
+
+      - name: Run
+        run: shellcheck ./scripts/*.sh

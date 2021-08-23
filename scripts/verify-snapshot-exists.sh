@@ -9,20 +9,20 @@ URL="https://api.digitalocean.com/v2/snapshots/${IMAGE_ID}"
 
 RESPONSE_JSON=$(curl -s -X GET -H 'Content-Type: application/json' -H "${AUTH_HEADER}" "${URL}")
 
-RESPONSE_JSON_HAS_SNAPSHOT=$(echo $RESPONSE_JSON | jq 'has("snapshot")')
-if [ $RESPONSE_JSON_HAS_SNAPSHOT != "true" ]; then
+RESPONSE_JSON_HAS_SNAPSHOT=$(echo "$RESPONSE_JSON" | jq 'has("snapshot")')
+if [ "$RESPONSE_JSON_HAS_SNAPSHOT" != "true" ]; then
   exit $EXIT_CODE_RESPONSE_SNAPSHOT_MISSING
 fi
 
-SNAPSHOT_JSON_HAS_ID=$(echo $RESPONSE_JSON | jq '.snapshot' | jq 'has("id")')
-if [ $SNAPSHOT_JSON_HAS_ID != "true" ]; then
+SNAPSHOT_JSON_HAS_ID=$(echo "$RESPONSE_JSON" | jq '.snapshot' | jq 'has("id")')
+if [ "$SNAPSHOT_JSON_HAS_ID" != "true" ]; then
   exit $EXIT_CODE_SNAPSHOT_ID_MISSING
 fi
 
-RESPONSE_ID=$(echo $RESPONSE_JSON | jq '.snapshot.id')
+RESPONSE_ID=$(echo "$RESPONSE_JSON" | jq '.snapshot.id')
 EXPECTED_RESPONSE_ID="\"${IMAGE_ID}\""
 
-if [ $RESPONSE_ID != $EXPECTED_RESPONSE_ID ]; then
+if [ "$RESPONSE_ID" != "$EXPECTED_RESPONSE_ID" ]; then
   exit $EXIT_CODE_SNAPSHOT_ID_INCORRECT
 fi
 
