@@ -66,7 +66,7 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           PR_NUMBER: ${{ github.event.number }}
           VERSION: ${{ steps.version.outputs.value }}
-        run: echo "::set-output name=value::$(./ci/create-snapshot-name.sh)"
+        run: echo "::set-output name=value::$(./scripts/create-snapshot-name.sh)"
 
       - name: Output snapshot name
         run: echo ${{ steps.snapshot-name.outputs.value }}
@@ -75,7 +75,7 @@ jobs:
         id: image-versions
         env:
           ENV_FILE_PATH: ./image-versions.env
-        run: ./ci/read-env-file.sh
+        run: ./scripts/read-env-file.sh
 
       - name: Output image versions
         env:
@@ -131,7 +131,7 @@ jobs:
       - name: Verify image exists
         env:
           IMAGE_ID: ${{ steps.image.outputs.id }}
-        run: ./ci/verify-snapshot-exists.sh
+        run: ./scripts/verify-snapshot-exists.sh
 
   trigger-deploy:
     needs: [setup, create-image]
@@ -168,5 +168,5 @@ jobs:
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
         run: |
-          ./ci/delete-snapshot.sh
-          ./ci/verify-snapshot-not-exists.sh
+          ./scripts/delete-snapshot.sh
+          ./scripts/verify-snapshot-not-exists.sh

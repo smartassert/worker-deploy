@@ -25,7 +25,7 @@ jobs:
         id: image-versions
         env:
           ENV_FILE_PATH: ./image-versions.env
-        run: ./ci/read-env-file.sh
+        run: ./scripts/read-env-file.sh
 
       - name: Output image versions
         env:
