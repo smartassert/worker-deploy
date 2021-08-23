@@ -47,6 +47,9 @@ jobs:
             echo "::set-output name=value::false"
           fi
 
+      - name: Output should deploy
+        run: echo ${{ steps.should-deploy.outputs.value }}
+
       - name: Set version
         id: version
         env:
