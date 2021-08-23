@@ -32,6 +32,9 @@ jobs:
       worker-version: ${{ steps.image-versions.outputs.WORKER_VERSION }}
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
       - name: Deploy after building image?
         id: should-deploy
         env:
