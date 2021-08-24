@@ -36,7 +36,7 @@ jobs:
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
           RELEASE_NOTES_PATH: ${{ steps.release-notes-path.outputs.value }}
-        run: ./scripts/create-release-notes.sh
+        run: ./scripts/create-release-notes.sh > $RELEASE_NOTES_PATH
 
       - name: Create release
         env:
