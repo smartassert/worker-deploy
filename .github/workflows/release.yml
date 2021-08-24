@@ -16,6 +16,9 @@ on:
         description: Deploy after building image?
         required: true
         default: "false"
+      version:
+        description: Existing version to release
+        required: true
 
 jobs:
   setup:
@@ -23,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should-deploy: ${{ steps.should-deploy.outputs.value }}
+      use-specific-version: ${{ steps.use-specific-version.outputs.value }}
       version: ${{ steps.version.outputs.value }}
       snapshot-name: ${{ steps.snapshot-name.outputs.value }}
       compiler-version: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
@@ -34,6 +38,25 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Use specific version?
+        id: use-specific-version
+        env:
+          VALUE: ${{ github.event.client_payload.version }}
+        run: echo "::set-output name=value::$(./scripts/is-value-set.sh)"
+
+      - name: Output use specific version
+        run: echo ${{ steps.use-specific-version.outputs.value }}
+
+      - name: Set version
+        id: version
+        env:
+          INPUT_VERSION: ${{ github.event.client_payload.version }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+        run: echo "::set-output name=value::$(./scripts/set-version.sh)"
+
+      - name: Output version
+        run: echo ${{ steps.version.outputs.value }}
 
       - name: Deploy after building image?
         id: should-deploy
@@ -49,16 +72,6 @@ jobs:
 
       - name: Output should deploy
         run: echo ${{ steps.should-deploy.outputs.value }}
-
-      - name: Set version
-        id: version
-        env:
-          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
-        run: |
-          [[ ! -z "$RELEASE_TAG_NAME" ]] && echo "::set-output name=value::$RELEASE_TAG_NAME" || echo "::set-output name=value::master"
-
-      - name: Output version
-        run: echo ${{ steps.version.outputs.value }}
 
       - name: Set snapshot name
         id: snapshot-name
@@ -108,8 +121,15 @@ jobs:
       image-id: ${{ steps.image.outputs.id }}
 
     steps:
-      - name: Checkout
+      - name: Checkout default branch
+        if: ${{ needs.setup.outputs.use-specific-version == 'false' }}
         uses: actions/checkout@v2
+
+      - name: Checkout specific version
+        if: ${{ needs.setup.outputs.use-specific-version == 'true' }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.version.outputs.value }}
 
       - name: Install packer
         run: |
