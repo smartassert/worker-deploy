@@ -125,7 +125,9 @@ jobs:
         run: ./scripts/packer-install.sh
 
       - name: Verify image configuration
-        run: packer validate image.pkr.hcl
+        env:
+          IMAGE_DEFINITION: "image.pkr.hcl"
+        run: ./scripts/packer-validate.sh
 
       - name: Create image
         id: image
