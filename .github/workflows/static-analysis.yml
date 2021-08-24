@@ -15,8 +15,5 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install ShellCheck
-        run: sudo apt-get install shellcheck
-
       - name: Run
-        run: shellcheck ./scripts/*.sh
+        run: docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable ./scripts/*.sh
