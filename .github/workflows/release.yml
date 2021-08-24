@@ -56,11 +56,11 @@ jobs:
         run: echo ${{ steps.version.outputs.value }}
 
       - name: Checkout default branch
-        if: ${{ steps.use-specific-version.outputs.value == "false" }}
+        if: ${{ steps.use-specific-version.outputs.value == 'false' }}
         uses: actions/checkout@v2
 
       - name: Checkout specific version
-        if: ${{ steps.use-specific-version.outputs.value == "true" }}
+        if: ${{ steps.use-specific-version.outputs.value == 'true' }}
         uses: actions/checkout@v2
         with:
           ref: ${{ steps.version.outputs.value }}
