@@ -26,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should-deploy: ${{ steps.should-deploy.outputs.value }}
+      use-specific-version: ${{ steps.use-specific-version.outputs.value }}
       version: ${{ steps.version.outputs.value }}
       snapshot-name: ${{ steps.snapshot-name.outputs.value }}
       compiler-version: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
