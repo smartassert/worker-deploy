@@ -54,8 +54,15 @@ jobs:
       - name: Output version
         run: echo ${{ steps.version.outputs.value }}
 
-      - name: Checkout
+      - name: Checkout default branch
+        if: ${{ steps.use-specific-version.outputs.value == "false" }}
         uses: actions/checkout@v2
+
+      - name: Checkout specific version
+        if: ${{ steps.use-specific-version.outputs.value == "true" }}
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ steps.version.outputs.value }}
 
       - name: Deploy after building image?
         id: should-deploy
