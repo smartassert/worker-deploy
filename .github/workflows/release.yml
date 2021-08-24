@@ -35,6 +35,15 @@ jobs:
       worker-version: ${{ steps.image-versions.outputs.WORKER_VERSION }}
 
     steps:
+      - name: Use specific version?
+        id: use-specific-version
+        env:
+          VALUE: ${{ github.event.client_payload.version }}
+        run: echo "::set-output name=value::$(./scripts/is-value-set.sh)"
+
+      - name: Output use specific version
+        run: echo ${{ steps.use-specific-version.outputs.value }}
+
       - name: Checkout
         uses: actions/checkout@v2
 
