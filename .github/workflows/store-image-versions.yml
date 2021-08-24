@@ -55,5 +55,6 @@ jobs:
           token: ${{ secrets.PAT_TOKEN_SELF }}
           inputs: |
             {
-              "commit_hash": "${{ steps.commit-hash.outputs.value }}"
+              "commit-hash": "${{ steps.commit-hash.outputs.value }}",
+              "should-release": "${{ steps.commit-hash.outputs.value }}"
             }

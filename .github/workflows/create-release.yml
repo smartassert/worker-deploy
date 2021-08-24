@@ -3,20 +3,34 @@ name: Create release
 on:
   workflow_dispatch:
     inputs:
-      commit_hash:
+      commit-hash:
         description: Commit hash to release from
         required: true
+      should-release:
+        description: Create release?
+        required: true
+        default: "true"
 
 jobs:
-  create-release:
-    name: Create release
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
+    outputs:
+      commit-hash: ${{ github.event.inputs.commit-hash }}
+      should-release: ${{ github.event.inputs.should-release }}
+      release-notes-path: ${{ steps.release-notes-path.outputs.value}}
+      release-tag: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+      compiler-version: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
+      chrome-runner-version: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
+      firefox-runner-version: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
+      delegator-version: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
+      worker-version: ${{ steps.image-versions.outputs.WORKER_VERSION }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.client_payload.commit_hash }}
+          ref: ${{ github.event.inputs.commit-hash }}
 
       - name: Get versions from image-versions.env
         id: image-versions
@@ -28,21 +42,60 @@ jobs:
         id: release-notes-path
         run: echo "::set-output name=value::release-notes.md"
 
+  verify-setup:
+    name: Verify setup
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Commit hash
+        run: echo ${{ need.setup.outputs.commit-hash }}
+
+      - name: Should release?
+        run: echo ${{ need.setup.outputs.should-release }}
+
+      - name: Release notes path
+        run: echo ${{ needs.setup.outputs.release-notes-path }}
+
+      - name: Release tag
+        run: echo ${{ needs.setup.outputs.release-tag }}
+
+      - name: Image versions
+        env:
+          COMPILER_VERSION: ${{ needs.setup.outputs.compiler-version }}
+          CHROME_RUNNER_VERSION: ${{ needs.setup.outputs.chrome-runner-version }}
+          FIREFOX_RUNNER_VERSION: ${{ needs.setup.outputs.firefox-runner-version }}
+          DELEGATOR_VERSION: ${{ needs.setup.outputs.delegator-version }}
+          WORKER_VERSION: ${{ needs.setup.outputs.worker-version }}
+        run: ./scripts/create-release-notes.sh
+
+  create-release:
+    name: Create release
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ needs.setup.outputs.commit-hash }}
+
       - name: Create release notes
         env:
-          COMPILER_VERSION: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-          CHROME_RUNNER_VERSION: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-          FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-          DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-          WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-          RELEASE_NOTES_PATH: ${{ steps.release-notes-path.outputs.value }}
+          COMPILER_VERSION: ${{ needs.setup.outputs.compiler-version }}
+          CHROME_RUNNER_VERSION: ${{ needs.setup.outputs.chrome-runner-version }}
+          FIREFOX_RUNNER_VERSION: ${{ needs.setup.outputs.firefox-runner-version }}
+          DELEGATOR_VERSION: ${{ needs.setup.outputs.delegator-version }}
+          WORKER_VERSION: ${{ needs.setup.outputs.worker-version }}
+          RELEASE_NOTES_PATH: ${{ needs.setup.outputs.release-notes-path }}
         run: ./scripts/create-release-notes.sh > $RELEASE_NOTES_PATH
 
       - name: Create release
+        if: ${{ needs.setup.oututs.should-release == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
-          TAG: ${{ github.event.client_payload.worker_version }}
-          TARGET: ${{ steps.commit_hash.outputs.value }}
-          TITLE: "Automatic release ${{ github.event.client_payload.worker_version }}"
-          NOTES_FILE: ${{ steps.release-notes-path.outputs.value }}
+          TAG: ${{ needs.setup.outputs.release-tag }}
+          TARGET: ${{ needs.setup.outputs.commit-hash }}
+          TITLE: "Automatic release ${{ needs.setup.outputs.release-tag }}"
+          NOTES_FILE: ${{ needs.setup.outputs.release-notes-path }}
         run: gh release create $TAG --target $TARGET --title "$TITLE" --notes-file $NOTES_FILE
