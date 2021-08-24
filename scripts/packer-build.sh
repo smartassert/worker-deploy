@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 packer build "$IMAGE_DEFINITION" | tee packer.log
-IMAGE_ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
+IMAGE_ID=$(tail -1 packer.log | grep -P -o 'ID: \d+' | tr -d 'ID: ')
 
 if ! [[ $IMAGE_ID =~ ^[0-9]+$ ]] ; then
    exit 1
