@@ -49,10 +49,10 @@ jobs:
 
     steps:
       - name: Commit hash
-        run: echo ${{ need.setup.outputs.commit-hash }}
+        run: echo ${{ needs.setup.outputs.commit-hash }}
 
       - name: Should release?
-        run: echo ${{ need.setup.outputs.should-release }}
+        run: echo ${{ needs.setup.outputs.should-release }}
 
       - name: Release notes path
         run: echo ${{ needs.setup.outputs.release-notes-path }}
