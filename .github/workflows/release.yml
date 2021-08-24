@@ -16,6 +16,9 @@ on:
         description: Deploy after building image?
         required: true
         default: "false"
+      version:
+        description: Existing version to release
+        required: true
 
 jobs:
   setup:
