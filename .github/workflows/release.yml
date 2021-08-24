@@ -131,10 +131,11 @@ jobs:
 
       - name: Create image
         id: image
+        env:
+          IMAGE_DEFINITION: "image.pkr.hcl"
         run: |
-          packer build image.pkr.hcl | tee packer.log
-          ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
-          echo "::set-output name=id::$ID"
+          IMAGE_ID=./scripts/packer-build.sh
+          echo "::set-output name=id::$IMAGE_ID"
 
       - name: Verify image exists
         env:
