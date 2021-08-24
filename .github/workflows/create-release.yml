@@ -3,16 +3,21 @@ name: Create release
 on:
   workflow_dispatch:
     inputs:
-      commit_hash:
+      commit-hash:
         description: Commit hash to release from
         required: true
+      should-release:
+        description: Create release?
+        required: true
+        default: "true"
 
 jobs:
   setup:
     name: Setup
     runs-on: ubuntu-latest
     outputs:
-      commit-hash: ${{ github.event.inputs.commit_hash }}
+      commit-hash: ${{ github.event.inputs.commit-hash }}
+      should-release: ${{ github.event.inputs.should-release }}
       release-notes-path: ${{ steps.release-notes-path.outputs.value}}
       release-tag: ${{ steps.image-versions.outputs.WORKER_VERSION }}
       compiler-version: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
@@ -25,7 +30,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.inputs.commit_hash }}
+          ref: ${{ github.event.inputs.commit-hash }}
 
       - name: Get versions from image-versions.env
         id: image-versions
@@ -45,6 +50,9 @@ jobs:
     steps:
       - name: Commit hash
         run: echo ${{ need.setup.outputs.commit-hash }}
+
+      - name: Should release?
+        run: echo ${{ need.setup.outputs.should-release }}
 
       - name: Release notes path
         run: echo ${{ needs.setup.outputs.release-notes-path }}
@@ -83,6 +91,7 @@ jobs:
         run: ./scripts/create-release-notes.sh > $RELEASE_NOTES_PATH
 
       - name: Create release
+        if: ${{ needs.setup.oututs.should-release == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
           TAG: ${{ needs.setup.outputs.release-tag }}
