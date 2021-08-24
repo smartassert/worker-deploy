@@ -41,7 +41,7 @@ jobs:
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
-          TAG: ${{ github.event.client_payload.worker_version }}
+          TAG: ${{ steps.image-versions.outputs.WORKER_VERSION }}
           TARGET: ${{ steps.commit_hash.outputs.value }}
           TITLE: "Automatic release ${{ github.event.client_payload.worker_version }}"
           NOTES_FILE: ${{ steps.release-notes-path.outputs.value }}
