@@ -44,6 +44,16 @@ jobs:
       - name: Output use specific version
         run: echo ${{ steps.use-specific-version.outputs.value }}
 
+      - name: Set version
+        id: version
+        env:
+          INPUT_VERSION: ${{ github.event.client_payload.version }}
+          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
+        run: echo "::set-output name=value::$(./scripts/set-version.sh)"
+
+      - name: Output version
+        run: echo ${{ steps.version.outputs.value }}
+
       - name: Checkout
         uses: actions/checkout@v2
 
@@ -61,16 +71,6 @@ jobs:
 
       - name: Output should deploy
         run: echo ${{ steps.should-deploy.outputs.value }}
-
-      - name: Set version
-        id: version
-        env:
-          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
-        run: |
-          [[ ! -z "$RELEASE_TAG_NAME" ]] && echo "::set-output name=value::$RELEASE_TAG_NAME" || echo "::set-output name=value::master"
-
-      - name: Output version
-        run: echo ${{ steps.version.outputs.value }}
 
       - name: Set snapshot name
         id: snapshot-name
