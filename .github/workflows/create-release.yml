@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.client_payload.commit_hash }}
+          ref: ${{ github.event.inputs.commit_hash }}
 
       - name: Get versions from image-versions.env
         id: image-versions
