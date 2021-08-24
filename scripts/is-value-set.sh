@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-[[ ! -z "$VALUE" ]] && echo "true" || echo "false"
+[[ -n "$VALUE" ]] && echo "true" || echo "false"
