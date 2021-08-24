@@ -97,12 +97,7 @@ jobs:
           FIREFOX_RUNNER_VERSION: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
           DELEGATOR_VERSION: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
           WORKER_VERSION: ${{ steps.image-versions.outputs.WORKER_VERSION }}
-        run: |
-          echo COMPILER_VERSION $COMPILER_VERSION
-          echo CHROME_RUNNER_VERSION $CHROME_RUNNER_VERSION
-          echo FIREFOX_RUNNER_VERSION $FIREFOX_RUNNER_VERSION
-          echo DELEGATOR_VERSION $DELEGATOR_VERSION
-          echo WORKER_VERSION $WORKER_VERSION
+        run: ./scripts/create-release-notes.sh
 
   create-image:
     needs: setup
