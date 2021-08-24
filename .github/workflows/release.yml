@@ -63,12 +63,7 @@ jobs:
         env:
           INPUT_SHOULD_DEPLOY: ${{ github.event.client_payload.should-deploy }}
           EVENT_NAME: ${{ github.event_name }}
-        run: |
-          if [ "$EVENT_NAME" = "release" ] || [ "$INPUT_SHOULD_DEPLOY" = "true" ]; then
-            echo "::set-output name=value::true"
-          else
-            echo "::set-output name=value::false"
-          fi
+        run: echo "::set-output name=value::$(./scripts/should-deploy.sh)"
 
       - name: Output should deploy
         run: echo ${{ steps.should-deploy.outputs.value }}
@@ -127,21 +122,20 @@ jobs:
           ref: ${{ steps.version.outputs.value }}
 
       - name: Install packer
-        run: |
-          curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-          sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-          sudo apt-get update && sudo apt-get install packer
-          packer --version
+        run: ./scripts/packer-install.sh
 
-      - name: Verify image configuration
-        run: packer validate image.pkr.hcl
+      - name: Validate image configuration
+        env:
+          IMAGE_DEFINITION: "image.pkr.hcl"
+        run: ./scripts/packer-validate.sh
 
       - name: Create image
         id: image
+        env:
+          IMAGE_DEFINITION: "image.pkr.hcl"
         run: |
-          packer build image.pkr.hcl | tee packer.log
-          ID=$(cat packer.log | tail -1 | grep -P -o 'ID: \d+' | tr -d 'ID: ')
-          echo "::set-output name=id::$ID"
+          . ./scripts/packer-build.sh
+          echo "::set-output name=id::$IMAGE_ID"
 
       - name: Verify image exists
         env:
