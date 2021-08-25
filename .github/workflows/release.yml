@@ -42,7 +42,7 @@ jobs:
       - name: Use specific version?
         id: use-specific-version
         env:
-          VALUE: ${{ github.event.client_payload.version }}
+          VALUE: ${{ github.event.inputs.version }}
         run: echo "::set-output name=value::$(./scripts/is-value-set.sh)"
 
       - name: Output use specific version
@@ -51,7 +51,7 @@ jobs:
       - name: Set version
         id: version
         env:
-          INPUT_VERSION: ${{ github.event.client_payload.version }}
+          INPUT_VERSION: ${{ github.event.inputs.version }}
           RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
         run: echo "::set-output name=value::$(./scripts/set-version.sh)"
 
@@ -61,7 +61,7 @@ jobs:
       - name: Deploy after building image?
         id: should-deploy
         env:
-          INPUT_SHOULD_DEPLOY: ${{ github.event.client_payload.should-deploy }}
+          INPUT_SHOULD_DEPLOY: ${{ github.event.inputs.should-deploy }}
           EVENT_NAME: ${{ github.event_name }}
         run: echo "::set-output name=value::$(./scripts/should-deploy.sh)"
 

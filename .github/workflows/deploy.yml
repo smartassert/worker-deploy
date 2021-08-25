@@ -21,5 +21,5 @@ jobs:
           event-type: worker-deploy
           client-payload: |
             {
-              "worker_image": "${{ github.event.client_payload.image_id }}"
+              "worker_image": "${{ github.event.inputs.image_id }}"
             }
