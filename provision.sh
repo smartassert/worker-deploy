@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo apt-get update && apt-get install -y \
+sudo apt-get update && apt install -y \
     apt-transport-https \
     ca-certificates \
     curl \
@@ -14,7 +14,7 @@ sudo add-apt-repository \
    $(lsb_release -cs) \
    stable"
 
-sudo apt-get update && apt-get install -y \
+sudo apt-get update && apt install -y \
     docker-ce \
     docker-ce-cli \
     containerd.io
