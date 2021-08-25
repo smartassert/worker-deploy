@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-EXIT_CODE_INVALID_EVENT=1
-
 # push to master
 # EVENT_NAME='push' ./create-snapshot-name.sh
 
@@ -14,12 +12,34 @@ EXIT_CODE_INVALID_EVENT=1
 # workflow_dispatch
 # EVENT_NAME='workflow_dispatch' VERSION='0.4.12' ./create-snapshot-name.sh
 
-if [ "$EVENT_NAME" = "push" ]; then
-  echo "$VERSION"
-elif [ "$EVENT_NAME" = "pull_request" ]; then
-  echo "pull-request-${PR_NUMBER}"
-elif [ "$EVENT_NAME" = "release" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; then
+if [ -z "$EVENT_NAME" ]; then
+  exit 1
+fi
+
+if [ "push" != "$EVENT_NAME" ] &&
+   [ "pull_request" != "$EVENT_NAME" ] &&
+   [ "release" != "$EVENT_NAME" ] &&
+   [ "workflow_dispatch" != "$EVENT_NAME" ]
+then
+  exit 2
+fi
+
+if [ "push" = "$EVENT_NAME" ]; then
+  echo "master"
+fi
+
+if [ "pull_request" = "$EVENT_NAME" ]; then
+  if [ -z "$PR_NUMBER" ]; then
+    exit 3
+  fi
+
+  echo "pull-request-$PR_NUMBER"
+fi
+
+if [ "release" = "$EVENT_NAME" ] || [ "workflow_dispatch" = "$EVENT_NAME" ]; then
+  if [ -z "$VERSION" ]; then
+    exit 4
+  fi
+
   echo "release-$(echo "$VERSION" | tr -d '"')"
-else
-  exit $EXIT_CODE_INVALID_EVENT
 fi
