@@ -56,12 +56,6 @@ jobs:
       - name: Validate Vagrantfile
         run: vagrant validate
 
-      - name: Lint provision.sh
-        run: |
-          brew install shellcheck
-          shellcheck provision.sh
-          shellcheck self-test/*.sh
-
       - name: Vagrant up
         id: vagrant-up
         env:
