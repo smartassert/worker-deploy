@@ -30,4 +30,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run actionlint
-        run: docker run --rm -v $(pwd):/repo --workdir /repo rhysd/actionlint:latest -color
+        run: docker run --rm -v "$PWD:/repo" --workdir /repo rhysd/actionlint:latest -color
