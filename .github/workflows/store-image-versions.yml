@@ -28,13 +28,7 @@ jobs:
           FIREFOX_RUNNER_VERSION: ${{ github.event.client_payload.firefox_runner_version }}
           DELEGATOR_VERSION: ${{ github.event.client_payload.delegator_version }}
           WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
-        run: |
-          rm -f image-versions.env
-          echo "COMPILER_VERSION=$COMPILER_VERSION" >> image-versions.env
-          echo "CHROME_RUNNER_VERSION=$CHROME_RUNNER_VERSION" >> image-versions.env
-          echo "FIREFOX_RUNNER_VERSION=$FIREFOX_RUNNER_VERSION" >> image-versions.env
-          echo "DELEGATOR_VERSION=$DELEGATOR_VERSION" >> image-versions.env
-          echo "WORKER_VERSION=$WORKER_VERSION" >> image-versions.env
+        run: ./scripts/create-image-versions-env.sh > image-versions.env
 
       - name: Commit changes
         id: auto-commit-action
