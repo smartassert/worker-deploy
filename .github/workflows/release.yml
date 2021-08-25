@@ -26,7 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should-deploy: ${{ steps.should-deploy.outputs.value }}
-      use-specific-version: ${{ steps.use-specific-version.outputs.value }}
       version: ${{ steps.version.outputs.value }}
       snapshot-name: ${{ steps.snapshot-name.outputs.value }}
       compiler-version: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
@@ -57,6 +56,12 @@ jobs:
 
       - name: Output version
         run: echo ${{ steps.version.outputs.value }}
+
+      - name: Get specific version image-versions.env?
+        if: ${{ steps.use-specific-version.outputs.value == 'true' }}
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: ./scripts/get-image-versions-env.sh
 
       - name: Deploy after building image?
         id: should-deploy
@@ -112,14 +117,7 @@ jobs:
 
     steps:
       - name: Checkout default branch
-        if: ${{ needs.setup.outputs.use-specific-version == 'false' }}
         uses: actions/checkout@v2
-
-      - name: Checkout specific version
-        if: ${{ needs.setup.outputs.use-specific-version == 'true' }}
-        uses: actions/checkout@v2
-        with:
-          ref: ${{ needs.setup.outputs.version }}
 
       - name: Install packer
         run: ./scripts/packer-install.sh
