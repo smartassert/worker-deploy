@@ -119,7 +119,7 @@ jobs:
         if: ${{ needs.setup.outputs.use-specific-version == 'true' }}
         uses: actions/checkout@v2
         with:
-          ref: ${{ steps.version.outputs.value }}
+          ref: ${{ needs.setup.outputs.version }}
 
       - name: Install packer
         run: ./scripts/packer-install.sh
