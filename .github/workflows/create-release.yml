@@ -88,14 +88,14 @@ jobs:
           DELEGATOR_VERSION: ${{ needs.setup.outputs.delegator-version }}
           WORKER_VERSION: ${{ needs.setup.outputs.worker-version }}
           RELEASE_NOTES_PATH: ${{ needs.setup.outputs.release-notes-path }}
-        run: ./scripts/create-release-notes.sh > $RELEASE_NOTES_PATH
+        run: ./scripts/create-release-notes.sh > "$RELEASE_NOTES_PATH"
 
       - name: Create release
-        if: ${{ needs.setup.oututs.should-release == 'true' }}
+        if: ${{ needs.setup.outputs.should-release == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
           TAG: ${{ needs.setup.outputs.release-tag }}
           TARGET: ${{ needs.setup.outputs.commit-hash }}
           TITLE: "Automatic release ${{ needs.setup.outputs.release-tag }}"
           NOTES_FILE: ${{ needs.setup.outputs.release-notes-path }}
-        run: gh release create $TAG --target $TARGET --title "$TITLE" --notes-file $NOTES_FILE
+        run: gh release create "$TAG" --target "$TARGET" --title "$TITLE" --notes-file "$NOTES_FILE"
