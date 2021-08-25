@@ -79,7 +79,9 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           PR_NUMBER: ${{ github.event.number }}
           VERSION: ${{ steps.version.outputs.value }}
-        run: echo "::set-output name=value::$(./scripts/create-snapshot-name.sh)"
+        run: |
+          SNAPSHOT_NAME=$(./scripts/create-snapshot-name.sh)
+          echo "::set-output name=value::$SNAPSHOT_NAME"
 
       - name: Output snapshot name
         run: echo ${{ steps.snapshot-name.outputs.value }}
