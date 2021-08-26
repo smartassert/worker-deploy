@@ -20,7 +20,7 @@ jobs:
           PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: echo "$PAYLOAD"
 
-      - name: Update image-versions.env
+      - name: Update image versions
         if: ${{ github.event.client_payload.worker_version != 'master' }}
         env:
           COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
