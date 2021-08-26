@@ -64,7 +64,9 @@ jobs:
           ENV_FILE_PATH: ./image-versions.env
         run: |
           . ./scripts/get-image-versions-env.sh
-          printenv | grep VERSION
+          ./scripts/create-image-versions-env.sh > "$ENV_FILE_PATH"
+
+          cat "$ENV_FILE_PATH"
 
       - name: Deploy after building image?
         id: should-deploy
