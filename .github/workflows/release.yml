@@ -133,7 +133,7 @@ jobs:
         env:
           IMAGE_DEFINITION: "image.pkr.hcl"
         run: |
-          . ./scripts/packer-build.sh
+          IMAGE_ID=$(./scripts/packer-build.sh)
           echo "::set-output name=id::$IMAGE_ID"
 
       - name: Verify image exists
