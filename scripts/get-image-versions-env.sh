@@ -11,5 +11,5 @@ if [ "200" != "$STATUS_CODE" ]; then
 fi
 
 for VALUE in $(curl -s "$URL"); do
-  export echo "$VALUE"
+  export echo "${VALUE?}"
 done
