@@ -62,9 +62,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.value }}
           ENV_FILE_PATH: ./image-versions.env
-        run: |
-          . ./scripts/get-image-versions-env.sh
-          ./scripts/create-image-versions-env.sh > "$ENV_FILE_PATH"
+        run: ./scripts/get-image-versions-env.sh
 
       - name: Deploy after building image?
         id: should-deploy
