@@ -10,6 +10,4 @@ if [ "200" != "$STATUS_CODE" ]; then
   exit 1
 fi
 
-for VALUE in $(curl -s "$URL"); do
-  export echo "${VALUE?}"
-done
+curl -s -o "$ENV_FILE_PATH" "$URL"
