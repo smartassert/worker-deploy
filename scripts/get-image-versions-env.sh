@@ -10,4 +10,6 @@ if [ "200" != "$STATUS_CODE" ]; then
   exit 1
 fi
 
-curl -s -o image-versions.env "$URL"
+for VALUE in $(curl -s "$URL"); do
+  export echo "${VALUE?}"
+done
