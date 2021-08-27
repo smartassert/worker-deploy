@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ -z "$EXPECTED_EXISTS" ] || ([ "$EXPECTED_EXISTS" != "true" ] && [ "$EXPECTED_EXISTS" != "false" ]); then
+if [ -z "$EXPECTED_EXISTS" ] || { [ "$EXPECTED_EXISTS" != "true" ] && [ "$EXPECTED_EXISTS" != "false" ]; }; then
   EXPECTED_EXISTS="true"
 fi
 
