@@ -136,7 +136,7 @@ jobs:
           IMAGE_ID_PATH: image_id
         run: |
           ./scripts/packer-build.sh
-          echo "::set-output name=id::$(cat $IMAGE_ID_PATH)"
+          echo "::set-output name=id::$(cat "$IMAGE_ID_PATH")"
 
       - name: Verify image exists
         env:
