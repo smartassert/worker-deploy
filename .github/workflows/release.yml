@@ -141,7 +141,7 @@ jobs:
       - name: Verify image exists
         env:
           IMAGE_ID: ${{ steps.image.outputs.id }}
-          EXPECT_EXISTS: "true"
+          EXPECTED_EXISTS: "true"
         run: ./scripts/verify-snapshot-existence.sh
 
   trigger-deploy:
@@ -178,7 +178,7 @@ jobs:
         env:
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
-          EXPECT_EXISTS: "false"
+          EXPECTED_EXISTS: "false"
         run: |
           ./scripts/delete-snapshot.sh
           ./scripts/verify-snapshot-existence.sh
