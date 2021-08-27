@@ -10,4 +10,4 @@ if [ "200" != "$STATUS_CODE" ]; then
   exit 1
 fi
 
-curl -s -o "$ENV_FILE_PATH" "$URL"
+curl -s "$URL" >> "$ENV_FILE_PATH"
