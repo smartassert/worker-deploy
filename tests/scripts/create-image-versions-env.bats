@@ -3,7 +3,6 @@
 export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
 
 setup() {
-  load 'node_modules/bats-support/load'
   load 'node_modules/bats-assert/load'
 
   export COMPILER_VERSION="0.1"
