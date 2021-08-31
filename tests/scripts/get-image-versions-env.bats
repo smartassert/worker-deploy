@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
-export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+export script_name
 
 setup() {
   load 'node_modules/bats-assert/load'
@@ -9,13 +10,11 @@ setup() {
   export VERSION="0.5"
   export ENV_FILE_PATH="$BATS_TMPDIR/tmp-env-file.env"
 
-  export ENV_FILE_CONTENT=$(
-    echo "COMPILER_VERSION=0.1"
-    echo "CHROME_RUNNER_VERSION=0.2"
-    echo "FIREFOX_RUNNER_VERSION=0.3"
-    echo "DELEGATOR_VERSION=0.4"
-    echo "WORKER_VERSION=0.5"
-  )
+  export ENV_FILE_CONTENT="COMPILER_VERSION=0.1
+CHROME_RUNNER_VERSION=0.2
+FIREFOX_RUNNER_VERSION=0.3
+DELEGATOR_VERSION=0.4
+WORKER_VERSION=0.5"
 
   EXPECTED_FILE_SIZE="${#ENV_FILE_CONTENT}"
   EXPECTED_FILE_SIZE=$((EXPECTED_FILE_SIZE+1))
@@ -54,7 +53,7 @@ main() {
   LINE_INDEX=0
   for EXPECTED_LINE in $ENV_FILE_CONTENT; do
     LINE_INDEX=$((LINE_INDEX+1))
-    ACTUAL_LINE=$(sed "${LINE_INDEX}q;d" $ENV_FILE_PATH)
+    ACTUAL_LINE=$(sed "${LINE_INDEX}q;d" "$ENV_FILE_PATH")
     assert_equal "$ACTUAL_LINE" "$EXPECTED_LINE"
   done
 }
