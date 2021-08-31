@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
-export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+export script_name
 
 setup() {
   load 'node_modules/bats-assert/load'
@@ -18,9 +19,8 @@ main() {
 }
 
 @test "$script_name: event name not 'release' and input should deploy not 'true' outputs 'false'" {
-  export EVENT_NAME="push"
-  export INPUT_SHOULD_DEPLOY="false"
-
+  EVENT_NAME="push" \
+  INPUT_SHOULD_DEPLOY="false" \
   run main
 
   assert_success
@@ -28,9 +28,8 @@ main() {
 }
 
 @test "$script_name: event name not 'release' and input should deploy 'true' outputs 'true'" {
-  export EVENT_NAME="push"
-  export INPUT_SHOULD_DEPLOY="true"
-
+  EVENT_NAME="push" \
+  INPUT_SHOULD_DEPLOY="true" \
   run main
 
   assert_success
@@ -38,9 +37,8 @@ main() {
 }
 
 @test "$script_name: event name 'release' and input should deploy not 'true' outputs 'true'" {
-  export EVENT_NAME="release"
-  export INPUT_SHOULD_DEPLOY="false"
-
+  EVENT_NAME="release" \
+  INPUT_SHOULD_DEPLOY="false" \
   run main
 
   assert_success
@@ -48,9 +46,8 @@ main() {
 }
 
 @test "$script_name: event name 'release' and input should deploy 'true' outputs 'true'" {
-  export EVENT_NAME="release"
-  export INPUT_SHOULD_DEPLOY="true"
-
+  EVENT_NAME="release" \
+  INPUT_SHOULD_DEPLOY="true" \
   run main
 
   assert_success
