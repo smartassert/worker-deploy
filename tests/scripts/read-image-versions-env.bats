@@ -11,8 +11,6 @@ main() {
 }
 
 @test "$script_name: read is successful" {
-  export ENV_FILE_PATH="${BATS_TEST_DIRNAME}/../scripts/fixtures/empty.env"
-
   run main
 
   assert_success
