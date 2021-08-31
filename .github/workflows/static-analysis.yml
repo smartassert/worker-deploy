@@ -20,6 +20,7 @@ jobs:
           docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable ./scripts/*.sh
           docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable ./provision.sh
           docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable ./self-test/*.sh
+          docker run --rm -v "$PWD:/mnt" koalaman/shellcheck:stable ./tests/scripts/*.bats
 
   actionlint:
     name: Actionlint
