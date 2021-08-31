@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
-export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+export script_name
 
 setup() {
   load 'node_modules/bats-assert/load'
