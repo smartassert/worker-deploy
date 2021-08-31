@@ -1,8 +1,10 @@
 #!/usr/bin/env bats
 
-export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+export script_name
 
 setup() {
+  load 'node_modules/bats-support/load'
   load 'node_modules/bats-assert/load'
 }
 
@@ -11,8 +13,9 @@ main() {
 }
 
 @test "$script_name: non-empty release tag name outputs release tag name" {
-  export RELEASE_TAG_NAME="release-tag-name"
+  RELEASE_TAG_NAME="release-tag-name"
 
+  RELEASE_TAG_NAME="$RELEASE_TAG_NAME" \
   run main
 
   assert_success
@@ -20,8 +23,9 @@ main() {
 }
 
 @test "$script_name: non-empty input version outputs input version" {
-  export INPUT_VERSION="version"
+  INPUT_VERSION="version"
 
+  INPUT_VERSION="$INPUT_VERSION" \
   run main
 
   assert_success
@@ -36,9 +40,11 @@ main() {
 }
 
 @test "$script_name: non-empty release tag name and non-empty input version outputs release tag name" {
-  export RELEASE_TAG_NAME="release-tag-name"
-  export INPUT_VERSION="version"
+  RELEASE_TAG_NAME="release-tag-name"
+  INPUT_VERSION="version"
 
+  RELEASE_TAG_NAME="$RELEASE_TAG_NAME" \
+  INPUT_VERSION="$INPUT_VERSION" \
   run main
 
   assert_success
