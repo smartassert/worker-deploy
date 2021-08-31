@@ -1,6 +1,7 @@
 #!/usr/bin/env bats
 
-export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+export script_name
 
 setup() {
   load 'node_modules/bats-assert/load'
@@ -47,14 +48,13 @@ main() {
 }
 
 @test "$script_name: snapshot does not exist, EXPECT_EXISTS not valid" {
-  export EXPECTED_EXISTS="invalid value"
-
   function curl() {
     echo '{"id":"not_found","message":"The resource you were accessing could not be found."}'
   }
 
   export -f curl
 
+  EXPECTED_EXISTS="invalid value" \
   run main
 
   assert_failure "1"
@@ -62,14 +62,13 @@ main() {
 }
 
 @test "$script_name: snapshot does not exist, EXPECTED_EXISTS=true" {
-  export EXPECTED_EXISTS="true"
-
   function curl() {
     echo '{"id":"not_found","message":"The resource you were accessing could not be found."}'
   }
 
   export -f curl
 
+  EXPECTED_EXISTS="true" \
   run main
 
   assert_failure "1"
@@ -77,14 +76,13 @@ main() {
 }
 
 @test "$script_name: snapshot does not exist, EXPECTED_EXISTS=false" {
-  export EXPECTED_EXISTS="false"
-
   function curl() {
     echo '{"id":"not_found","message":"The resource you were accessing could not be found."}'
   }
 
   export -f curl
 
+  EXPECTED_EXISTS="false" \
   run main
 
   assert_success
@@ -105,14 +103,13 @@ main() {
 }
 
 @test "$script_name: snapshot does exist, EXPECTED_EXISTS not valid" {
-  export EXPECTED_EXISTS="invalid value"
-
   function curl() {
     echo '{"snapshot":{}}'
   }
 
   export -f curl
 
+  EXPECTED_EXISTS="invalid value" \
   run main
 
   assert_success
@@ -120,14 +117,13 @@ main() {
 }
 
 @test "$script_name: snapshot does exist, EXPECTED_EXISTS=false" {
-  export EXPECTED_EXISTS="false"
-
   function curl() {
     echo '{"snapshot":{}}'
   }
 
   export -f curl
 
+  EXPECTED_EXISTS="false" \
   run main
 
   assert_failure "1"
@@ -135,14 +131,13 @@ main() {
 }
 
 @test "$script_name: snapshot does exist, EXPECTED_EXISTS=true" {
-  export EXPECTED_EXISTS="true"
-
   function curl() {
     echo '{"snapshot":{}}'
   }
 
   export -f curl
 
+  EXPECTED_EXISTS="true" \
   run main
 
   assert_success
