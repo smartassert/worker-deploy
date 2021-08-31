@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+
 setup() {
   load 'node_modules/bats-support/load'
   load 'node_modules/bats-assert/load'
@@ -8,10 +10,10 @@ setup() {
 }
 
 main() {
-  bash "${BATS_TEST_DIRNAME}"/../../scripts/packer-validate.sh
+  bash "${BATS_TEST_DIRNAME}/../../scripts/$script_name"
 }
 
-@test "packer validate call is formed successfully" {
+@test "$script_name: call is formed successfully" {
   function packer() {
     echo "$1 $2"
   }

@@ -1,15 +1,17 @@
 #!/usr/bin/env bats
 
+export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+
 setup() {
   load 'node_modules/bats-support/load'
   load 'node_modules/bats-assert/load'
 }
 
 main() {
-  bash "${BATS_TEST_DIRNAME}"/../../scripts/read-env-file.sh
+  bash "${BATS_TEST_DIRNAME}/../../scripts/$script_name"
 }
 
-@test "read-env-file handles empty file" {
+@test "$script_name: empty file" {
   export ENV_FILE_PATH="${BATS_TEST_DIRNAME}/../scripts/fixtures/empty.env"
 
   run main
@@ -18,7 +20,7 @@ main() {
   assert_output ""
 }
 
-@test "read-env-file handles single-item file" {
+@test "$script_name: single-item file" {
   export ENV_FILE_PATH="${BATS_TEST_DIRNAME}/../scripts/fixtures/single.env"
 
   run main
@@ -27,7 +29,7 @@ main() {
   assert_output "COMPILER_VERSION=0.29"
 }
 
-@test "read-env-file handles multi-item file" {
+@test "$script_name: multi-item file" {
   export ENV_FILE_PATH="${BATS_TEST_DIRNAME}/../scripts/fixtures/multiple.env"
 
   run main
@@ -40,7 +42,7 @@ main() {
   )"
 }
 
-@test "read-env-file handles multi-item file with blank lines between items" {
+@test "$script_name: multi-item file with blank lines between items" {
   export ENV_FILE_PATH="${BATS_TEST_DIRNAME}/../scripts/fixtures/multiple-with-blank-lines.env"
 
   run main
@@ -53,7 +55,7 @@ main() {
   )"
 }
 
-@test "read-env-file handles multi-item file and output template" {
+@test "$script_name: multi-item file and output template" {
   export ENV_FILE_PATH="${BATS_TEST_DIRNAME}/../scripts/fixtures/multiple.env"
   export OUTPUT_TEMPLATE="!!_key_!!===*_value_*"
 

@@ -1,15 +1,17 @@
 #!/usr/bin/env bats
 
+export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+
 setup() {
   load 'node_modules/bats-support/load'
   load 'node_modules/bats-assert/load'
 }
 
 main() {
-  bash "${BATS_TEST_DIRNAME}"/../../scripts/read-image-versions-env.sh
+  bash "${BATS_TEST_DIRNAME}/../../scripts/$script_name"
 }
 
-@test "read-image-versions-env reads successfully" {
+@test "$script_name: read is successful" {
   export ENV_FILE_PATH="${BATS_TEST_DIRNAME}/../scripts/fixtures/empty.env"
 
   run main

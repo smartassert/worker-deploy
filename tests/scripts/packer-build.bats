@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+
 setup() {
   load 'node_modules/bats-support/load'
   load 'node_modules/bats-assert/load'
@@ -19,10 +21,10 @@ teardown() {
 }
 
 main() {
-  bash "${BATS_TEST_DIRNAME}"/../../scripts/packer-build.sh
+  bash "${BATS_TEST_DIRNAME}/../../scripts/$script_name"
 }
 
-@test "packer build call fails if last line of output does not contain image ID" {
+@test "$script_name: fails if last line of output does not contain image ID" {
   function packer() {
     echo "$1 $2"
   }
@@ -36,7 +38,7 @@ main() {
 
 }
 
-@test "packer build call is successful" {
+@test "$script_name: successful" {
   IMAGE_ID="90571431"
 
   PACKER_OUTPUT=$(

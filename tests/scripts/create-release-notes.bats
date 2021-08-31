@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+
 setup() {
   load 'node_modules/bats-support/load'
   load 'node_modules/bats-assert/load'
@@ -20,10 +22,10 @@ setup() {
 }
 
 main() {
-  bash "${BATS_TEST_DIRNAME}"/../../scripts/create-release-notes.sh
+  bash "${BATS_TEST_DIRNAME}/../../scripts/$script_name"
 }
 
-@test "release notes content is created" {
+@test "$script_name: content is created" {
   run main
 
   assert_success

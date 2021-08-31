@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
+
 setup() {
   load 'node_modules/bats-support/load'
   load 'node_modules/bats-assert/load'
@@ -38,10 +40,10 @@ teardown() {
 }
 
 main() {
-  bash "${BATS_TEST_DIRNAME}"/../../scripts/get-image-versions-env.sh
+  bash "${BATS_TEST_DIRNAME}/../../scripts/$script_name"
 }
 
-@test "request to get image versions is successful" {
+@test "$script_name: request is successful" {
   assert_file_not_exist "$ENV_FILE_PATH"
 
   run main

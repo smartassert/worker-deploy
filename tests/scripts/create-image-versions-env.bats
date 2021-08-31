@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-export script_name="create-image-versions-env.sh"
+export script_name=$(basename "$BATS_TEST_FILENAME" | sed 's/bats/sh/g')
 
 setup() {
   load 'node_modules/bats-support/load'
