@@ -57,12 +57,20 @@ jobs:
       - name: Output version
         run: echo ${{ steps.version.outputs.value }}
 
+      - name: Checkout bash-ga-cli-tools
+        uses: actions/checkout@v2
+        with:
+          repository: smartassert/bash-ga-cli-tools
+          path: ./vendor/smartassert/bash-ga-cli-tools
+          ref: main
+
       - name: Get image versions for specified version?
         if: ${{ steps.use-specific-version.outputs.value == 'true' }}
         env:
+          REPO: ${{ github.repository }}
           VERSION: ${{ steps.version.outputs.value }}
-          ENV_FILE_PATH: ./image-versions.env
-        run: ./scripts/get-image-versions-env.sh
+          FILE_PATH: ./image-versions.env
+        run: ./vendor/smartassert/bash-ga-cli-tools/src/get-gh-file.sh.sh
 
       - name: Deploy after building image?
         id: should-deploy
