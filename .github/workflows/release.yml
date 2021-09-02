@@ -60,8 +60,8 @@ jobs:
       - name: Checkout bash-ga-cli-tools
         uses: actions/checkout@v2
         with:
-          repository: smartassert/bash-ga-cli-tools
-          path: ./vendor/smartassert/bash-ga-cli-tools
+          repository: smartassert/bash-ga-ci-tools
+          path: ./vendor/smartassert/bash-ga-ci-tools
           ref: main
 
       - name: Get image versions for specified version?
