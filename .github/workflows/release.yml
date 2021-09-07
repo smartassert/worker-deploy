@@ -165,11 +165,12 @@ jobs:
 
       - name: Debug image creation - post
         run: |
+          grep "A snapshot was created" ./packer.log | grep --extended-regexp --only-matching "ID: [^)]+" | grep --extended-regexp --only-matching "[0-9]+"
 #          while read line; do
 #            echo "$line"
 #          done <"./packer.log"
 
-          tail -100 "./packer.log"
+'          tail -100 "./packer.log"
 
 #      - name: Verify image exists
 #        env:
