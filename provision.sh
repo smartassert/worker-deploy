@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
-sudo apt update && apt install -y \
+function run_command_until_successful () {
+  until "$@"
+  do
+      echo -e "\033[1mRetrying $*\033[0m"
+      sleep 1
+  done
+}
+
+run_command_until_successful sudo apt-get update
+run_command_until_successful sudo apt-get install -y \
     apt-transport-https \
     ca-certificates \
     curl \
@@ -14,13 +23,15 @@ sudo add-apt-repository \
    $(lsb_release -cs) \
    stable"
 
-sudo apt update && apt install -y \
+
+run_command_until_successful sudo apt-get update
+run_command_until_successful sudo apt-get install -y \
     docker-ce \
     docker-ce-cli \
     containerd.io
 
-sudo apt autoremove -y \
-  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+run_command_until_successful sudo apt-get autoremove -y
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 DOCKER_COMPOSE_BIN=/usr/local/bin/docker-compose
 if [ ! -f "$DOCKER_COMPOSE_BIN" ]; then
