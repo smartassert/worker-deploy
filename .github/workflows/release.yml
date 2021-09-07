@@ -50,9 +50,10 @@ jobs:
       - name: Set version
         id: version
         env:
-          INPUT_VERSION: ${{ github.event.inputs.version }}
-          RELEASE_TAG_NAME: ${{ github.event.release.tag_name }}
-        run: echo "::set-output name=value::$(./scripts/set-version.sh)"
+          VALUE1: ${{ github.event.inputs.version }}
+          VALUE2: ${{ github.event.release.tag_name }}
+          DEFAULT: master
+        run: echo "::set-output name=value::$(./scripts/select-defined-variable-or-default.sh)"
 
       - name: Output version
         run: echo ${{ steps.version.outputs.value }}
