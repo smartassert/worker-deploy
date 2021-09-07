@@ -19,27 +19,27 @@ main() {
   assert_output ""
 }
 
-@test "$script_name: non-empty release tag name outputs release tag name" {
-  RELEASE_TAG_NAME="release-tag-name"
+@test "$script_name: non-empty VALUE1 outputs VALUE1" {
+  VALUE1="release-tag-name"
 
-  RELEASE_TAG_NAME="$RELEASE_TAG_NAME" \
+  VALUE1="$VALUE1" \
   run main
 
   assert_success
-  assert_output "$RELEASE_TAG_NAME"
+  assert_output "$VALUE1"
 }
 
-@test "$script_name: non-empty input version outputs input version" {
-  INPUT_VERSION="version"
+@test "$script_name: non-empty VALUE2 outputs VALUE2" {
+  VALUE2="version"
 
-  INPUT_VERSION="$INPUT_VERSION" \
+  VALUE2="$VALUE2" \
   run main
 
   assert_success
-  assert_output "$INPUT_VERSION"
+  assert_output "$VALUE2"
 }
 
-@test "$script_name: empty release tag name and empty input version outputs 'master'" {
+@test "$script_name: empty VALUE1 and VALUE2 outputs DEFAULT" {
   DEFAULT="master" \
   run main
 
@@ -47,14 +47,14 @@ main() {
   assert_output "master"
 }
 
-@test "$script_name: non-empty release tag name and non-empty input version outputs release tag name" {
-  RELEASE_TAG_NAME="release-tag-name"
-  INPUT_VERSION="version"
+@test "$script_name: non-empty VALUE1 and non-empty VALUE2 outputs VALUE1" {
+  VALUE1="release-tag-name"
+  VALUE2="version"
 
-  RELEASE_TAG_NAME="$RELEASE_TAG_NAME" \
-  INPUT_VERSION="$INPUT_VERSION" \
+  VALUE1="$VALUE1" \
+  VALUE2="$VALUE2" \
   run main
 
   assert_success
-  assert_output "$RELEASE_TAG_NAME"
+  assert_output "$VALUE1"
 }

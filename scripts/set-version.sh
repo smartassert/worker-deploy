@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-if [ "$RELEASE_TAG_NAME" != "" ]; then
-  echo "$RELEASE_TAG_NAME"
-elif [ "$INPUT_VERSION" != "" ]; then
-  echo "$INPUT_VERSION"
+if [ "$VALUE1" != "" ]; then
+  echo "$VALUE1"
+elif [ "$VALUE2" != "" ]; then
+  echo "$VALUE2"
 else
   echo "$DEFAULT"
 fi
