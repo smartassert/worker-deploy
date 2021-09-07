@@ -138,13 +138,11 @@ jobs:
       - name: Checkout default branch
         uses: actions/checkout@v2
 
-      - name: Install packer
-        run: ./scripts/packer-install.sh
-
       - name: Validate image configuration
-        env:
-          IMAGE_DEFINITION: "image.pkr.hcl"
-        run: ./scripts/packer-validate.sh
+        uses: hashicorp/packer-github-actions@master
+        with:
+          command: validate
+          target: image.pkr.hcl
 
       - name: Create image
         id: image
