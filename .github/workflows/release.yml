@@ -165,7 +165,7 @@ jobs:
 
       - name: Debug image creation - post
         run: |
-          tail -10 "./packer.log"
+          cat "./packer.log"
           grep "A snapshot was created" ./packer.log | grep --extended-regexp --only-matching "ID: [^)]+" | grep --extended-regexp --only-matching "[0-9]+"
 
 #      - name: Verify image exists
