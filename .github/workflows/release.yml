@@ -144,21 +144,38 @@ jobs:
           command: validate
           target: image.pkr.hcl
 
-      - name: Create image
-        id: image
-        env:
-          IMAGE_DEFINITION: "image.pkr.hcl"
-          PACKER_LOG_PATH: packer.log
-          IMAGE_ID_PATH: image_id
-        run: |
-          ./scripts/packer-build.sh
-          echo "::set-output name=id::$(cat "$IMAGE_ID_PATH")"
+#      - name: Create image
+#        id: image
+#        env:
+#          IMAGE_DEFINITION: "image.pkr.hcl"
+#          PACKER_LOG_PATH: packer.log
+#          IMAGE_ID_PATH: image_id
+#        run: |
+#          ./scripts/packer-build.sh
+#          echo "::set-output name=id::$(cat "$IMAGE_ID_PATH")"
 
-      - name: Verify image exists
+      - name: Debug image creation - pre
+        run: |
+          ls -la
+
+      - name: Create image
+        uses: hashicorp/packer-github-actions@master
+        with:
+          command: build
+          arguments: " | tee packer.log"
+          target: packer.pkr.hcl
         env:
-          IMAGE_ID: ${{ steps.image.outputs.id }}
-          EXPECTED_EXISTS: "true"
-        run: ./scripts/verify-snapshot-existence.sh
+          PACKER_LOG: 1
+
+      - name: Debug image creation - post
+        run: |
+          ls -la
+
+#      - name: Verify image exists
+#        env:
+#          IMAGE_ID: ${{ steps.image.outputs.id }}
+#          EXPECTED_EXISTS: "true"
+#        run: ./scripts/verify-snapshot-existence.sh
 
 #  trigger-deploy:
 #    needs: [setup, create-image]
