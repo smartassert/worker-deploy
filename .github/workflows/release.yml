@@ -165,7 +165,7 @@ jobs:
 
       - name: Debug image creation - post
         run: |
-          tail -1 "./packer.log"
+          tail -10 "./packer.log"
 
 #      - name: Verify image exists
 #        env:
