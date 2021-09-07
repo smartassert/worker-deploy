@@ -12,6 +12,13 @@ main() {
   bash "${BATS_TEST_DIRNAME}/../../scripts/$script_name"
 }
 
+@test "$script_name: no arguments" {
+  run main
+
+  assert_success
+  assert_output "master"
+}
+
 @test "$script_name: non-empty release tag name outputs release tag name" {
   RELEASE_TAG_NAME="release-tag-name"
 
