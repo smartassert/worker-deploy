@@ -165,7 +165,11 @@ jobs:
 
       - name: Debug image creation - post
         run: |
-          tail -10 "./packer.log"
+#          while read line; do
+#            echo "$line"
+#          done <"./packer.log"
+
+          tail -100 "./packer.log"
 
 #      - name: Verify image exists
 #        env:
