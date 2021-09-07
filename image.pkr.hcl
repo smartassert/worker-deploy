@@ -119,60 +119,60 @@ build {
     scripts = ["./provision.sh"]
   }
 
-  # Copy docker services self-test files and run docker services self-test process
-  provisioner "shell" {
-    inline = ["mkdir -p ~/self-test"]
-  }
-
-  provisioner "file" {
-    destination = "~/self-test/fixtures"
-    source      = "self-test/fixtures"
-  }
-
-  provisioner "shell" {
-    scripts = ["./self-test/docker-compose-services.sh"]
-  }
-
-  provisioner "shell" {
-    environment_vars = ["BROWSER=chrome"]
-    scripts          = ["./self-test/delegator.sh"]
-  }
-
-  provisioner "shell" {
-    environment_vars = ["BROWSER=firefox"]
-    scripts          = ["./self-test/delegator.sh"]
-  }
-
-  # Copy app self-test files and run app self-test process
-  provisioner "shell" {
-    inline = ["mkdir -p ~/self-test/app"]
-  }
-
-  provisioner "file" {
-    destination = "~/self-test/app/composer.json"
-    source      = "self-test/app/composer.json"
-  }
-
-  provisioner "file" {
-    destination = "~/self-test/app/src"
-    source      = "self-test/app/src"
-  }
-
-  provisioner "file" {
-    destination = "~/self-test/services.yml"
-    source      = "self-test/services.yml"
-  }
-
-  provisioner "shell" {
-    environment_vars = [
-      "LOCAL_SOURCE_PATH=/var/basil/source",
-      "COMPILER_VERSION=${var.compiler_version}",
-      "CHROME_RUNNER_VERSION=${var.chrome_runner_version}",
-      "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
-      "DELEGATOR_VERSION=${var.delegator_version}",
-      "WORKER_VERSION=${var.worker_version}",
-    ]
-    scripts = ["./self-test/app.sh"]
-  }
+//  # Copy docker services self-test files and run docker services self-test process
+//  provisioner "shell" {
+//    inline = ["mkdir -p ~/self-test"]
+//  }
+//
+//  provisioner "file" {
+//    destination = "~/self-test/fixtures"
+//    source      = "self-test/fixtures"
+//  }
+//
+//  provisioner "shell" {
+//    scripts = ["./self-test/docker-compose-services.sh"]
+//  }
+//
+//  provisioner "shell" {
+//    environment_vars = ["BROWSER=chrome"]
+//    scripts          = ["./self-test/delegator.sh"]
+//  }
+//
+//  provisioner "shell" {
+//    environment_vars = ["BROWSER=firefox"]
+//    scripts          = ["./self-test/delegator.sh"]
+//  }
+//
+//  # Copy app self-test files and run app self-test process
+//  provisioner "shell" {
+//    inline = ["mkdir -p ~/self-test/app"]
+//  }
+//
+//  provisioner "file" {
+//    destination = "~/self-test/app/composer.json"
+//    source      = "self-test/app/composer.json"
+//  }
+//
+//  provisioner "file" {
+//    destination = "~/self-test/app/src"
+//    source      = "self-test/app/src"
+//  }
+//
+//  provisioner "file" {
+//    destination = "~/self-test/services.yml"
+//    source      = "self-test/services.yml"
+//  }
+//
+//  provisioner "shell" {
+//    environment_vars = [
+//      "LOCAL_SOURCE_PATH=/var/basil/source",
+//      "COMPILER_VERSION=${var.compiler_version}",
+//      "CHROME_RUNNER_VERSION=${var.chrome_runner_version}",
+//      "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
+//      "DELEGATOR_VERSION=${var.delegator_version}",
+//      "WORKER_VERSION=${var.worker_version}",
+//    ]
+//    scripts = ["./self-test/app.sh"]
+//  }
 
 }
