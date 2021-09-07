@@ -38,6 +38,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Checkout bash-ga-cli-tools
+        uses: actions/checkout@v2
+        with:
+          repository: smartassert/bash-ga-ci-tools
+          path: ./vendor/smartassert/bash-ga-ci-tools
+          ref: main
+
       - name: Use specific version?
         id: use-specific-version
         env:
@@ -53,17 +60,10 @@ jobs:
           VALUE1: ${{ github.event.inputs.version }}
           VALUE2: ${{ github.event.release.tag_name }}
           DEFAULT: master
-        run: echo "::set-output name=value::$(./scripts/select-defined-variable-or-default.sh)"
+        run: echo "::set-output name=value::$(./vendor/smartassert/bash-ga-cli-tools/src/select-defined-variable-or-default.sh)"
 
       - name: Output version
         run: echo ${{ steps.version.outputs.value }}
-
-      - name: Checkout bash-ga-cli-tools
-        uses: actions/checkout@v2
-        with:
-          repository: smartassert/bash-ga-ci-tools
-          path: ./vendor/smartassert/bash-ga-ci-tools
-          ref: main
 
       - name: Get image versions for specified version?
         if: ${{ steps.use-specific-version.outputs.value == 'true' }}
