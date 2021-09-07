@@ -157,7 +157,7 @@ jobs:
         id: image
         run: |
           IMAGE_ID=$(
-            grep "A snapshot was created" ./foo.txt | \
+            grep "A snapshot was created" ./packer.log | \
             tail -1 | \
             grep --extended-regexp --only-matching "ID: [^)]+" | \
             grep --extended-regexp --only-matching "[0-9]+"
