@@ -5,5 +5,5 @@ if [ "$RELEASE_TAG_NAME" != "" ]; then
 elif [ "$INPUT_VERSION" != "" ]; then
   echo "$INPUT_VERSION"
 else
-  echo "master"
+  echo "$DEFAULT"
 fi

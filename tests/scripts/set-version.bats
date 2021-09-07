@@ -16,7 +16,7 @@ main() {
   run main
 
   assert_success
-  assert_output "master"
+  assert_output ""
 }
 
 @test "$script_name: non-empty release tag name outputs release tag name" {
@@ -40,6 +40,7 @@ main() {
 }
 
 @test "$script_name: empty release tag name and empty input version outputs 'master'" {
+  DEFAULT="master" \
   run main
 
   assert_success
