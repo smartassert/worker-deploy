@@ -163,7 +163,7 @@ jobs:
         with:
           command: build
           arguments: ""
-          target: packer.pkr.hcl
+          target: image.pkr.hcl
         env:
           PACKER_LOG: 1
 
