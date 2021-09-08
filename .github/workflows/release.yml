@@ -181,7 +181,7 @@ jobs:
         env:
           IMAGE_ID: ${{ steps.image.outputs.id }}
           EXPECTED_EXISTS: "true"
-        run: ./scripts/verify-snapshot-existence.sh
+        run: ./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/verify-existence.sh
 
   trigger-deploy:
     needs: [setup, create-image]
