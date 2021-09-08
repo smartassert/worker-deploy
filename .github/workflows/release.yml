@@ -38,7 +38,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Checkout bash-ga-cli-tools
+      - name: Checkout bash-ga-ci-tools
         uses: actions/checkout@v2
         with:
           repository: smartassert/bash-ga-ci-tools
@@ -60,10 +60,13 @@ jobs:
           VALUE1: ${{ github.event.inputs.version }}
           VALUE2: ${{ github.event.release.tag_name }}
           DEFAULT: master
-        run: echo "::set-output name=value::$(./vendor/smartassert/bash-ga-cli-tools/src/select-defined-variable-or-default.sh)"
+        run: echo "::set-output name=value::$(./vendor/smartassert/bash-ga-ci-tools/src/select-defined-variable-or-default.sh)"
 
       - name: Output version
-        run: echo ${{ steps.version.outputs.value }}
+        env:
+          VERSION: ${{ steps.version.outputs.value }}
+        run: |
+          [ "" != "$VERSION" ] && echo "$VERSION"
 
       - name: Get image versions for specified version?
         if: ${{ steps.use-specific-version.outputs.value == 'true' }}
@@ -71,7 +74,7 @@ jobs:
           REPO: ${{ github.repository }}
           VERSION: ${{ steps.version.outputs.value }}
           FILE_PATH: ./image-versions.env
-        run: ./vendor/smartassert/bash-ga-cli-tools/src/get-gh-file.sh.sh
+        run: ./vendor/smartassert/bash-ga-ci-tools/src/get-gh-file.sh.sh
 
       - name: Deploy after building image?
         id: should-deploy
