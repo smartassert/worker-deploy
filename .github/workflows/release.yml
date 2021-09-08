@@ -163,13 +163,9 @@ jobs:
         env:
           PACKER_LOG_PATH: ${{ steps.packer-log-path.outputs.value }}
         run: |
-          cat "$PACKER_LOG_PATH"
-
           IMAGE_ID=$(
-            grep "A snapshot was created" "$PACKER_LOG_PATH" | \
-            tail -1 | \
-            grep --extended-regexp --only-matching "ID: [^)]+" | \
-            grep --extended-regexp --only-matching "[0-9]+"
+            grep --extended-regexp "Snapshot image ID: [[:digit:]]+" "$PACKER_LOG_PATH" | \
+            grep --extended-regexp --only-matching "[[:digit:]]+$"
           )
 
           echo "::set-output name=id::$IMAGE_ID"
