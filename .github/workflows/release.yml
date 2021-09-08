@@ -45,6 +45,13 @@ jobs:
           path: ./vendor/smartassert/bash-ga-ci-tools
           ref: main
 
+      - name: Checkout bash-ga-deploy-tools
+        uses: actions/checkout@v2
+        with:
+          repository: smartassert/bash-ga-deploy-tools
+          path: ./vendor/smartassert/bash-ga-deploy-tools
+          ref: main
+
       - name: Use specific version?
         id: use-specific-version
         env:
@@ -64,9 +71,9 @@ jobs:
 
       - name: Output version
         env:
-          VERSION: ${{ steps.version.outputs.value }}
+          VALUE: ${{ steps.version.outputs.value }}
         run: |
-          [ "" != "$VERSION" ] && echo "$VERSION"
+          [ "" != "$VALUE" ] && echo "$VALUE"
 
       - name: Get image versions for specified version?
         if: ${{ steps.use-specific-version.outputs.value == 'true' }}
@@ -93,11 +100,14 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
           VERSION: ${{ steps.version.outputs.value }}
         run: |
-          SNAPSHOT_NAME=$(./scripts/create-snapshot-name.sh)
+          SNAPSHOT_NAME=$(./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/create-name.sh)
           echo "::set-output name=value::$SNAPSHOT_NAME"
 
       - name: Output snapshot name
-        run: echo ${{ steps.snapshot-name.outputs.value }}
+        env:
+          VALUE: ${{ steps.snapshot-name.outputs.value }}
+        run: |
+          [ "" != "$VALUE" ] && echo "$VALUE"
 
       - name: Checkout bash-read-env-file
         uses: actions/checkout@v2
