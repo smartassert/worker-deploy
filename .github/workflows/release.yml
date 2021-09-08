@@ -219,5 +219,5 @@ jobs:
           IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
           EXPECTED_EXISTS: "false"
         run: |
-          ./scripts/delete-snapshot.sh
-          ./scripts/verify-snapshot-existence.sh
+          ./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/delete.sh
+          ./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/verify-existence.sh
