@@ -152,6 +152,7 @@ jobs:
         uses: hashicorp/packer-github-actions@master
         with:
           command: build
+          arguments: "-machine-readable"
           target: image.pkr.hcl
         env:
           PACKER_LOG: 1
@@ -162,6 +163,8 @@ jobs:
         env:
           PACKER_LOG_PATH: ${{ steps.packer-log-path.outputs.value }}
         run: |
+          cat "$PACKER_LOG_PATH"
+
           IMAGE_ID=$(
             grep "A snapshot was created" "$PACKER_LOG_PATH" | \
             tail -1 | \
