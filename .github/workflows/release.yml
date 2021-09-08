@@ -151,6 +151,13 @@ jobs:
       - name: Checkout default branch
         uses: actions/checkout@v2
 
+      - name: Checkout bash-ga-deploy-tools
+        uses: actions/checkout@v2
+        with:
+          repository: smartassert/bash-ga-deploy-tools
+          path: ./vendor/smartassert/bash-ga-deploy-tools
+          ref: main
+
       - name: Validate image configuration
         uses: hashicorp/packer-github-actions@master
         with:
@@ -181,7 +188,7 @@ jobs:
         env:
           IMAGE_ID: ${{ steps.image.outputs.id }}
           EXPECTED_EXISTS: "true"
-        run: ./scripts/verify-snapshot-existence.sh
+        run: ./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/verify-existence.sh
 
   trigger-deploy:
     needs: [setup, create-image]
@@ -213,11 +220,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Checkout bash-ga-deploy-tools
+        uses: actions/checkout@v2
+        with:
+          repository: smartassert/bash-ga-deploy-tools
+          path: ./vendor/smartassert/bash-ga-deploy-tools
+          ref: main
+
       - name: Remove snapshot
         env:
           DIGITALOCEAN_API_TOKEN: ${{ secrets.DIGITALOCEAN_API_TOKEN }}
           IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
           EXPECTED_EXISTS: "false"
         run: |
-          ./scripts/delete-snapshot.sh
-          ./scripts/verify-snapshot-existence.sh
+          ./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/delete.sh
+          ./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/verify-existence.sh
