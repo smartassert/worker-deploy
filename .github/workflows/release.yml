@@ -86,9 +86,10 @@ jobs:
       - name: Deploy after building image?
         id: should-deploy
         env:
-          INPUT_SHOULD_DEPLOY: ${{ github.event.inputs.should-deploy }}
-          EVENT_NAME: ${{ github.event_name }}
-        run: echo "::set-output name=value::$(./scripts/should-deploy.sh)"
+          EXPECTED: release
+          ACTUAL: ${{ github.event_name }}
+          DEFAULT: ${{ github.event.inputs.should-deploy }}
+        run: echo "::set-output name=value::$(./scripts/boolean-if-actual-is-expected-else-default.sh)"
 
       - name: Output should deploy
         run: echo ${{ steps.should-deploy.outputs.value }}
