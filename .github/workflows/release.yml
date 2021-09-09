@@ -89,7 +89,7 @@ jobs:
           EXPECTED: release
           ACTUAL: ${{ github.event_name }}
           DEFAULT: ${{ github.event.inputs.should-deploy }}
-        run: echo "::set-output name=value::$(./scripts/boolean-if-actual-is-expected-else-default.sh)"
+        run: echo "::set-output name=value::$(./vendor/smartassert/bash-ga-ci-tools/src/boolean-if-actual-is-expected-else-default.sh)"
 
       - name: Output should deploy
         run: echo ${{ steps.should-deploy.outputs.value }}
