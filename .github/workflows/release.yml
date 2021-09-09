@@ -183,7 +183,7 @@ jobs:
         id: image
         env:
           PACKER_LOG_PATH: ${{ steps.packer-log-path.outputs.value }}
-        run: echo "::set-output name=id::$(./scripts/extract-image-id-from-packer-log.sh)"
+        run: echo "::set-output name=id::$(./vendor/smartassert/bash-ga-deploy-tools/src/extract-id-from-packer-log.sh)"
 
       - name: Verify image exists
         env:
