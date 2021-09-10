@@ -105,6 +105,18 @@ jobs:
           ENV_FILE_PATH: ./image-versions.env
         run: ./vendor/smartassert/bash-read-env-file/src/read-env-file-ga.sh
 
+  poc-verify-setup:
+    name: POC verify setup
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Output
+        env:
+          outputs: ${{ toJson(needs.setup.outputs) }}
+        run: |
+          echo "$outputs"
+
   verify-setup:
     name: Verify setup
     runs-on: ubuntu-latest
