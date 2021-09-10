@@ -56,7 +56,7 @@ jobs:
         id: use-specific-version
         env:
           VALUE: ${{ github.event.inputs.version }}
-        run: echo "::set-output name=value::$(./scripts/is-value-set.sh)"
+        run: echo "::set-output name=value::$(./vendor/smartassert/bash-ga-ci-tools/src/is-value-set.sh)"
 
       - name: Output use specific version
         run: echo ${{ steps.use-specific-version.outputs.value }}
