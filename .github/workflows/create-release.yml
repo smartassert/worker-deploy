@@ -63,7 +63,7 @@ jobs:
   create-release:
     name: Create release
     runs-on: ubuntu-latest
-    needs: setup
+    needs: [setup, verify-setup]
 
     steps:
       - name: Checkout
