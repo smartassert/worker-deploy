@@ -15,6 +15,12 @@ jobs:
       firefox-runner-version: ${{ github.event.client_payload.firefox_runner_version }}
       delegator-version: ${{ github.event.client_payload.delegator_version }}
 
+    steps:
+      - name: Output payload
+        env:
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: echo "$PAYLOAD"
+
   verify-setup:
     name: Verify setup
     runs-on: ubuntu-latest
@@ -92,7 +98,6 @@ jobs:
         run: echo "::set-output name=value::$(git rev-parse HEAD)"
 
       - name: Trigger create-release workflow
-        if: ${{ steps.auto-commit-action.outputs.changes_detected == 'true' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Create release
