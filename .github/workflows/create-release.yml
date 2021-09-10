@@ -55,26 +55,10 @@ jobs:
     needs: setup
 
     steps:
-      - name: Commit hash
-        run: echo ${{ needs.setup.outputs.commit-hash }}
-
-      - name: Should release?
-        run: echo ${{ needs.setup.outputs.should-release }}
-
-      - name: Release notes path
-        run: echo ${{ needs.setup.outputs.release-notes-path }}
-
-      - name: Release tag
-        run: echo ${{ needs.setup.outputs.release-tag }}
-
-      - name: Image versions
+      - name: Output
         env:
-          COMPILER_VERSION: ${{ needs.setup.outputs.compiler-version }}
-          CHROME_RUNNER_VERSION: ${{ needs.setup.outputs.chrome-runner-version }}
-          FIREFOX_RUNNER_VERSION: ${{ needs.setup.outputs.firefox-runner-version }}
-          DELEGATOR_VERSION: ${{ needs.setup.outputs.delegator-version }}
-          WORKER_VERSION: ${{ needs.setup.outputs.worker-version }}
-        run: ./scripts/create-release-notes.sh
+          outputs: ${{ toJson(needs.setup.outputs) }}
+        run: echo "$outputs"
 
   create-release:
     name: Create release
