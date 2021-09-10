@@ -105,18 +105,6 @@ jobs:
           ENV_FILE_PATH: ./image-versions.env
         run: ./vendor/smartassert/bash-read-env-file/src/read-env-file-ga.sh
 
-  poc-verify-setup:
-    name: POC verify setup
-    runs-on: ubuntu-latest
-    needs: setup
-
-    steps:
-      - name: Output
-        env:
-          outputs: ${{ toJson(needs.setup.outputs) }}
-        run: |
-          echo "$outputs"
-
   verify-setup:
     name: Verify setup
     runs-on: ubuntu-latest
@@ -125,23 +113,8 @@ jobs:
     steps:
       - name: Output
         env:
-          version: ${{ needs.setup.outputs.version }}
-          should_deploy: ${{ needs.setup.outputs.should-deploy }}
-          snapshot_name: ${{ needs.setup.outputs.snapshot-name }}
-          worker_version: ${{ needs.setup.outputs.worker-version }}
-          compiler_version: ${{ needs.setup.outputs.compiler-version }}
-          chrome_runner_version: ${{ needs.setup.outputs.chrome-runner-version }}
-          firefox_runner_version: ${{ needs.setup.outputs.firefox-runner-version }}
-          delegator_version: ${{ needs.setup.outputs.delegator-version }}
-        run: |
-          [ "" != "$version" ] && echo "$version"
-          [ "" != "$should_deploy" ] && echo "$should_deploy"
-          [ "" != "$snapshot_name" ] && echo "$snapshot_name"
-          [ "" != "$worker_version" ] && echo "$worker_version"
-          [ "" != "$compiler_version" ] && echo "$compiler_version"
-          [ "" != "$chrome_runner_version" ] && echo "$chrome_runner_version"
-          [ "" != "$firefox_runner_version" ] && echo "$firefox_runner_version"
-          [ "" != "$delegator_version" ] && echo "$delegator_version"
+          outputs: ${{ toJson(needs.setup.outputs) }}
+        run: echo "$outputs"
 
   create-image:
     needs: setup
