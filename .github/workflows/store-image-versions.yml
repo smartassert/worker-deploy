@@ -5,9 +5,60 @@ on:
     types: [worker-release]
 
 jobs:
-  build:
-    name: Store image versions
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
+    outputs:
+      worker-version: ${{ github.event.client_payload.worker_version }}
+      compiler-version: ${{ github.event.client_payload.compiler_version }}
+      chrome-runner-version: ${{ github.event.client_payload.chrome_runner_version }}
+      firefox-runner-version: ${{ github.event.client_payload.firefox_runner_version }}
+      delegator-version: ${{ github.event.client_payload.delegator_version }}
+
+    steps:
+      - name: Output payload
+        env:
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: echo "$PAYLOAD"
+
+  verify-setup:
+    name: Verify setup
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Worker version
+        env:
+          VALUE: ${{ needs.setup.outputs.worker-version }}
+        run: '[ "" != "$VALUE" ] && echo "$VALUE"'
+
+      - name: Compiler version
+        env:
+          VALUE: ${{ needs.setup.outputs.compiler-version }}
+        run: '[ "" != "$VALUE" ] && echo "$VALUE"'
+
+      - name: Chrome runner version
+        env:
+          VALUE: ${{ needs.setup.outputs.chrome-runner-version }}
+        run: '[ "" != "$VALUE" ] && echo "$VALUE"'
+
+      - name: Firefox runner version
+        env:
+          VALUE: ${{ needs.setup.outputs.firefox-runner-version }}
+        run: '[ "" != "$VALUE" ] && echo "$VALUE"'
+
+      - name: Delegator version
+        env:
+          VALUE: ${{ needs.setup.outputs.delegator-version }}
+        run: '[ "" != "$VALUE" ] && echo "$VALUE"'
+
+  store:
+    name: Store
+    runs-on: ubuntu-latest
+    needs: [setup, verify-setup]
+    if: ${{ needs.setup.outputs.worker-version != 'master' }}
+    outputs:
+      create-release: ${{ steps.auto-commit-action.outputs.changes_detected }}
 
     steps:
       - name: Checkout
@@ -15,34 +66,38 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN_SELF }}
 
-      - name: Output payload
+      - name: Update
         env:
-          PAYLOAD: ${{ toJson(github.event.client_payload) }}
-        run: echo "$PAYLOAD"
-
-      - name: Update image versions
-        if: ${{ github.event.client_payload.worker_version != 'master' }}
-        env:
-          COMPILER_VERSION: ${{ github.event.client_payload.compiler_version }}
-          CHROME_RUNNER_VERSION: ${{ github.event.client_payload.chrome_runner_version }}
-          FIREFOX_RUNNER_VERSION: ${{ github.event.client_payload.firefox_runner_version }}
-          DELEGATOR_VERSION: ${{ github.event.client_payload.delegator_version }}
-          WORKER_VERSION: ${{ github.event.client_payload.worker_version }}
+          COMPILER_VERSION: ${{ needs.setup.outputs.compiler-version }}
+          CHROME_RUNNER_VERSION: ${{ needs.setup.outputs.chrome-runner-version }}
+          FIREFOX_RUNNER_VERSION: ${{ needs.setup.outputs.firefox-runner-version }}
+          DELEGATOR_VERSION: ${{ needs.setup.outputs.delegator-version }}
+          WORKER_VERSION: ${{ needs.setup.outputs.worker-version }}
         run: ./scripts/create-image-versions-env.sh > image-versions.env
 
-      - name: Commit changes
+      - name: Commit
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "Automatic image-versions.env for worker release ${{ github.event.client_payload.worker_version }}"
 
+  trigger-create-release:
+    name: Trigger create release workflow
+    runs-on: ubuntu-latest
+    needs: [setup, store]
+    if: ${{ needs.store.outputs.create-release == 'true' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.PAT_TOKEN_SELF }}
+
       - name: Get latest commit hash
         id: commit-hash
-        if: ${{ steps.auto-commit-action.outputs.changes_detected == 'true' }}
         run: echo "::set-output name=value::$(git rev-parse HEAD)"
 
       - name: Trigger create-release workflow
-        if: ${{ steps.auto-commit-action.outputs.changes_detected == 'true' }}
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Create release
