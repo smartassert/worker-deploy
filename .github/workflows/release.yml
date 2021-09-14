@@ -196,14 +196,10 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Trigger deploy workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: Deploy
-          token: ${{ secrets.PAT_TOKEN_SELF }}
-          inputs: |
-            {
-              "image_id": "${{ needs.create-image.outputs.image-id }}"
-            }
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
+          IMAGE_ID: ${{ needs.create-image.outputs.image-id }}
+        run: gh workflow run deploy.yml -f image_id="$IMAGE_ID"
 
   remove-snapshot:
     needs: create-image

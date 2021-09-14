@@ -85,12 +85,7 @@ jobs:
           token: ${{ secrets.PAT_TOKEN_SELF }}
 
       - name: Trigger create-release workflow
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: Create release
-          token: ${{ secrets.PAT_TOKEN_SELF }}
-          inputs: |
-            {
-              "commit-hash": "${{ needs.store.outputs.commit-hash }}",
-              "should-release": "true"
-            }
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
+          COMMIT_HASH: ${{ needs.store.outputs.commit-hash }}
+        run: gh workflow run create-release.yml -f commit-hash="$COMMIT_HASH" -f should-release="true"
