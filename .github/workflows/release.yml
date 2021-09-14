@@ -72,7 +72,7 @@ jobs:
           REPO: ${{ github.repository }}
           VERSION: ${{ steps.version.outputs.value }}
           FILE_PATH: ./image-versions.env
-        run: ./vendor/smartassert/bash-ga-ci-tools/src/get-gh-file.sh.sh
+        run: ./vendor/smartassert/bash-ga-ci-tools/src/get-gh-file.sh
 
       - name: Deploy after building image?
         id: should-deploy
