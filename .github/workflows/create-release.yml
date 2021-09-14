@@ -9,7 +9,7 @@ on:
       should-release:
         description: Create release?
         required: true
-        default: "true"
+        default: "false"
 
 jobs:
   setup:
