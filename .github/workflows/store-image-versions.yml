@@ -39,6 +39,7 @@ jobs:
     if: ${{ needs.setup.outputs.worker-version != 'master' }}
     outputs:
       create-release: ${{ steps.auto-commit-action.outputs.changes_detected }}
+      commit-hash: ${{ steps.auto-commit-action.outputs.commit_hash }}
 
     steps:
       - name: Checkout
@@ -73,10 +74,6 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN_SELF }}
 
-      - name: Get latest commit hash
-        id: commit-hash
-        run: echo "::set-output name=value::$(git rev-parse HEAD)"
-
       - name: Trigger create-release workflow
         uses: benc-uk/workflow-dispatch@v1
         with:
@@ -84,6 +81,6 @@ jobs:
           token: ${{ secrets.PAT_TOKEN_SELF }}
           inputs: |
             {
-              "commit-hash": "${{ steps.commit-hash.outputs.value }}",
+              "commit-hash": "${{ needs.store.outputs.commit-hash }}",
               "should-release": "true"
             }
