@@ -71,7 +71,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           VERSION: ${{ steps.version.outputs.value }}
-          FILE_PATH: ./image-versions.env
+          FILE_PATH: ./image-versions.json
         run: ./vendor/smartassert/bash-ga-ci-tools/src/get-gh-file.sh
 
       - name: Deploy after building image?
@@ -91,13 +91,6 @@ jobs:
         run: |
           SNAPSHOT_NAME=$(./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/create-name.sh)
           echo "::set-output name=value::$SNAPSHOT_NAME"
-
-      - name: Checkout bash-ga-ci-tools
-        uses: actions/checkout@v2
-        with:
-          repository: smartassert/bash-ga-ci-tools
-          path: ./vendor/smartassert/bash-ga-ci-tools
-          ref: main
 
       - name: Read image versions
         id: image-versions
