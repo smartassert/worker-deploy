@@ -28,11 +28,11 @@ jobs:
       should-deploy: ${{ steps.should-deploy.outputs.value }}
       version: ${{ steps.version.outputs.value }}
       snapshot-name: ${{ steps.snapshot-name.outputs.value }}
-      compiler-version: ${{ steps.image-versions.outputs.COMPILER_VERSION }}
-      chrome-runner-version: ${{ steps.image-versions.outputs.CHROME_RUNNER_VERSION }}
-      firefox-runner-version: ${{ steps.image-versions.outputs.FIREFOX_RUNNER_VERSION }}
-      delegator-version: ${{ steps.image-versions.outputs.DELEGATOR_VERSION }}
-      worker-version: ${{ steps.image-versions.outputs.WORKER_VERSION }}
+      compiler-version: ${{ steps.image-versions.outputs.compiler }}
+      chrome-runner-version: ${{ steps.image-versions.outputs.chrome_runner }}
+      firefox-runner-version: ${{ steps.image-versions.outputs.firefox_runner }}
+      delegator-version: ${{ steps.image-versions.outputs.delegator }}
+      worker-version: ${{ steps.image-versions.outputs.worker }}
 
     steps:
       - name: Checkout
@@ -92,18 +92,18 @@ jobs:
           SNAPSHOT_NAME=$(./vendor/smartassert/bash-ga-deploy-tools/src/digitalocean-snapshot/create-name.sh)
           echo "::set-output name=value::$SNAPSHOT_NAME"
 
-      - name: Checkout bash-read-env-file
+      - name: Checkout bash-ga-ci-tools
         uses: actions/checkout@v2
         with:
-          repository: smartassert/bash-read-env-file
-          path: ./vendor/smartassert/bash-read-env-file
+          repository: smartassert/bash-ga-ci-tools
+          path: ./vendor/smartassert/bash-ga-ci-tools
           ref: main
 
       - name: Read image versions
         id: image-versions
         env:
-          ENV_FILE_PATH: ./image-versions.env
-        run: ./vendor/smartassert/bash-read-env-file/src/read-env-file-ga.sh
+          CONFIGURATION_PATH: ./services/${{ github.event.inputs.service_id }}/configuration.json
+        run: ./vendor/smartassert/bash-ga-ci-tools/src/create-ga-outputs-from-json-scalar-object.sh < ./image-versions.json
 
   verify-setup:
     name: Verify setup
