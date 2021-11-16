@@ -3,5 +3,5 @@
   "chrome_runner": "0.18",
   "firefox_runner": "0.18",
   "delegator": "0.7",
-  "worker": "0.31"
+  "worker": "0.7"
 }
