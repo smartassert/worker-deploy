@@ -74,9 +74,9 @@ services:
       - ~/caddy/index.php:/app/public/index.php
       - ~/caddy/Caddyfile:/etc/caddy/Caddyfile
 
-  app-web:
+  app:
     image: ghcr.io/smartassert/worker:${WORKER_VERSION}
-    container_name: app-web
+    container_name: app
     restart: always
     networks:
       - primary
@@ -88,6 +88,6 @@ services:
       - delegator
       - postgres
     volumes:
-      - /var/log/app-web:/app/var/log
+      - /var/log/app:/app/var/log
       - ${LOCAL_SOURCE_PATH}:${SOURCE_PATH}
       - ${LOCAL_TARGET_PATH}:${TARGET_PATH}

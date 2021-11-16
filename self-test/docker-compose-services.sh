@@ -7,7 +7,7 @@ Services=(
   delegator
   postgres
   caddy
-  app-web
+  app
 )
 
 for Service in "${Services[@]}"
