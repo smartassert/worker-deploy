@@ -21,7 +21,9 @@ class ApplicationTest extends TestCase
     {
         parent::setUpBeforeClass();
 
-        self::$httpClient = new Client();
+        self::$httpClient = new Client([
+            'verify' => false,
+        ]);
         self::$fixturePath = (string) realpath(getcwd() . '/../fixtures');
     }
 
