@@ -94,17 +94,15 @@ build {
   }
 
   provisioner "shell" {
-    inline = ["mkdir -p ~/nginx"]
+    inline = ["mkdir -p ~/caddy"]
   }
 
   provisioner "file" {
-    destination = "~/nginx/Dockerfile"
-    source      = "nginx/Dockerfile"
-  }
-
-  provisioner "file" {
-    destination = "~/nginx/site.conf"
-    source      = "nginx/site.conf"
+    destination = "~/caddy/"
+    sources = [
+      "${path.root}/caddy/Caddyfile",
+      "${path.root}/caddy/index.php"
+    ]
   }
 
   provisioner "shell" {

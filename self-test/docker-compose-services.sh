@@ -6,7 +6,7 @@ Services=(
   firefox-runner
   delegator
   postgres
-  nginx
+  caddy
   app-web
 )
 
