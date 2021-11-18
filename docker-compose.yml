@@ -71,14 +71,14 @@ services:
     ports:
       - "443:443"
     links:
-      - app-web:app-web
+      - app:app
     volumes:
       - ./caddy/index.php:/app/public/index.php
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile
 
-  app-web:
+  app:
     image: ghcr.io/smartassert/worker:${WORKER_VERSION}
-    container_name: app-web
+    container_name: app
     restart: always
     networks:
       - primary
