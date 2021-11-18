@@ -10,7 +10,7 @@ Services=(
   app-web
 )
 
-for Service in ${Services[*]}
+for Service in "${Services[@]}"
   do
     if ! sudo docker-compose ps --services --filter "status=running" | grep "$Service"; then
         echo "$Service not ok"

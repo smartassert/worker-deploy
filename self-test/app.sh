@@ -64,7 +64,7 @@ DB_TABLES=(
   "source"
 )
 
-for TABLE in ${DB_TABLES[*]}
+for TABLE in "${DB_TABLES[@]}"
   do
     echo "Removing all from $TABLE"
     sudo docker-compose exec -T -e PGPASSWORD=password! postgres psql -U postgres -d worker-db -c "DELETE FROM ${TABLE}"
