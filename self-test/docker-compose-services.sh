@@ -6,8 +6,8 @@ Services=(
   firefox-runner
   delegator
   postgres
-  nginx
-  app-web
+  caddy
+  app
 )
 
 for Service in "${Services[@]}"

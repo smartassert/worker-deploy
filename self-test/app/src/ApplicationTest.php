@@ -21,13 +21,15 @@ class ApplicationTest extends TestCase
     {
         parent::setUpBeforeClass();
 
-        self::$httpClient = new Client();
+        self::$httpClient = new Client([
+            'verify' => false,
+        ]);
         self::$fixturePath = (string) realpath(getcwd() . '/../fixtures');
     }
 
     public function testCreateJob(): void
     {
-        $createJobResponse = self::$httpClient->post('http://localhost/job', [
+        $createJobResponse = self::$httpClient->post('https://localhost/job', [
             'form_params' => [
                 'label' => self::JOB_LABEL,
                 'callback-url' => self::CALLBACK_URL,
@@ -53,7 +55,7 @@ class ApplicationTest extends TestCase
      */
     public function testAddSources(): void
     {
-        $addSourcesResponse = self::$httpClient->post('http://localhost/add-sources', [
+        $addSourcesResponse = self::$httpClient->post('https://localhost/add-sources', [
             'multipart' => [
                 [
                     'name' => base64_encode('manifest'),
@@ -109,7 +111,7 @@ class ApplicationTest extends TestCase
      */
     private function getJobStatus(): array
     {
-        $response = self::$httpClient->get('http://localhost/job');
+        $response = self::$httpClient->get('https://localhost/job');
         self::assertSame(200, $response->getStatusCode());
 
         $data = json_decode($response->getBody()->getContents(), true);

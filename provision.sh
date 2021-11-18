@@ -56,5 +56,5 @@ sudo \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
   docker-compose up -d
-sudo docker-compose exec -T app-web php bin/console doctrine:database:create --if-not-exists
-sudo docker-compose exec -T app-web php bin/console doctrine:schema:update --force
+sudo docker-compose exec -T app php bin/console doctrine:database:create --if-not-exists
+sudo docker-compose exec -T app php bin/console doctrine:schema:update --force
