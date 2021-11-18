@@ -94,8 +94,6 @@ jobs:
 
       - name: Read image versions
         id: image-versions
-        env:
-          CONFIGURATION_PATH: ./services/${{ github.event.inputs.service_id }}/configuration.json
         run: ./vendor/smartassert/bash-ga-ci-tools/src/create-ga-outputs-from-json-scalar-object.sh < ./image-versions.json
 
   verify-setup:
