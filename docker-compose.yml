@@ -60,23 +60,25 @@ services:
       - ${POSTGRES_EXPOSED_PORT}:5432
 
   caddy:
-    image: caddy:2.4.5
+    image: caddy:2.4.5-alpine
     container_name: caddy
     restart: unless-stopped
+    networks:
+      - primary
     environment:
       DOMAIN: ${CADDY_DOMAIN:-localhost}
       TLS_INTERNAL: ${CADDY_TLS_INTERNAL:-internal}
     ports:
       - "443:443"
     links:
-      - app:app
+      - app-web:app-web
     volumes:
-      - ~/caddy/index.php:/app/public/index.php
-      - ~/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./caddy/index.php:/app/public/index.php
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
 
-  app:
+  app-web:
     image: ghcr.io/smartassert/worker:${WORKER_VERSION}
-    container_name: app
+    container_name: app-web
     restart: always
     networks:
       - primary
