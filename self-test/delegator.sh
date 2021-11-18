@@ -20,7 +20,7 @@ echo "${ICON_PASSED} compiler test passed"
 COMPILED_TARGET_LINE=$(echo -e "${COMPILE_OUTPUT}" | grep "/app/tests/Generated")
 COMPILED_TARGET=$(echo "${COMPILED_TARGET_LINE/target: /}" | xargs)
 
-docker run --name http-fixtures --network worker-network -p 8080:80 -v "${PWD}/self-test/fixtures/http":/usr/share/nginx/html:ro -d nginx:1.19
+docker run --name http-fixtures --network worker-network -p 8080:80 -v "${PWD}/self-test/fixtures/http":/usr/share/caddy:ro -d caddy:2.4.5-alpine
 
 sudo docker-compose exec -T delegator ./bin/delegator  --browser "${BROWSER}" "${COMPILED_TARGET}"
 DELEGATOR_EXIT_CODE=$?
