@@ -40,7 +40,7 @@ class ApplicationTest extends TestCase
         self::assertSame('application/json', $createJobResponse->getHeaderLine('content-type'));
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
-            'callback_url' => self::EVENT_DELIVERY_URL,
+            'event_delivery_url' => self::EVENT_DELIVERY_URL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             'sources' => [],
             'compilation_states' => ['awaiting'],
@@ -72,7 +72,7 @@ class ApplicationTest extends TestCase
         self::assertSame('application/json', $addSourcesResponse->getHeaderLine('content-type'));
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
-            'callback_url' => self::EVENT_DELIVERY_URL,
+            'event_delivery_url' => self::EVENT_DELIVERY_URL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             'sources' => [
                 'test.yml',
@@ -144,7 +144,7 @@ class ApplicationTest extends TestCase
         $job = $this->getJobStatus();
 
         self::assertSame($expectedJobData['label'], $job['label']);
-        self::assertSame($expectedJobData['callback_url'], $job['callback_url']);
+        self::assertSame($expectedJobData['event_delivery_url'], $job['event_delivery_url']);
         self::assertSame($expectedJobData['maximum_duration_in_seconds'], $job['maximum_duration_in_seconds']);
         self::assertSame($expectedJobData['sources'], $job['sources']);
         self::assertContains($job['compilation_state'], $expectedJobData['compilation_states']);
