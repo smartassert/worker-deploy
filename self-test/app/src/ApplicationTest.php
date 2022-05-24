@@ -33,7 +33,7 @@ class ApplicationTest extends TestCase
             'form_params' => [
                 'label' => self::JOB_LABEL,
                 'event_delivery_url' => self::EVENT_DELIVERY_URL,
-                'maximum-duration-in-seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
+                'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             ],
         ]);
         self::assertSame(200, $createJobResponse->getStatusCode());
