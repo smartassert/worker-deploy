@@ -12,7 +12,7 @@ class ApplicationTest extends TestCase
     private const JOB_LABEL = 'job-label-content';
     private const JOB_MAXIMUM_DURATION_IN_SECONDS = 600;
 
-    private const CALLBACK_URL = 'http://callback-receiver:8080/';
+    private const EVENT_DELIVERY_URL = 'http://callback-receiver:8080/';
 
     private static Client $httpClient;
     private static string $fixturePath;
@@ -32,7 +32,7 @@ class ApplicationTest extends TestCase
         $createJobResponse = self::$httpClient->post('https://localhost/job', [
             'form_params' => [
                 'label' => self::JOB_LABEL,
-                'callback-url' => self::CALLBACK_URL,
+                'event_delivery_url' => self::EVENT_DELIVERY_URL,
                 'maximum-duration-in-seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             ],
         ]);
@@ -40,7 +40,7 @@ class ApplicationTest extends TestCase
         self::assertSame('application/json', $createJobResponse->getHeaderLine('content-type'));
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
-            'callback_url' => self::CALLBACK_URL,
+            'callback_url' => self::EVENT_DELIVERY_URL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             'sources' => [],
             'compilation_states' => ['awaiting'],
@@ -72,7 +72,7 @@ class ApplicationTest extends TestCase
         self::assertSame('application/json', $addSourcesResponse->getHeaderLine('content-type'));
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
-            'callback_url' => self::CALLBACK_URL,
+            'callback_url' => self::EVENT_DELIVERY_URL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             'sources' => [
                 'test.yml',
