@@ -6,6 +6,12 @@ namespace App;
 
 use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;
+use SmartAssert\YamlFile\Collection\ArrayCollection;
+use SmartAssert\YamlFile\Collection\Serializer as YamlFileCollectionSerializer;
+use SmartAssert\YamlFile\FileHashes;
+use SmartAssert\YamlFile\FileHashes\Serializer as FileHashesSerializer;
+use SmartAssert\YamlFile\YamlFile;
+use Symfony\Component\Yaml\Dumper as YamlDumper;
 
 class ApplicationTest extends TestCase
 {
@@ -16,6 +22,7 @@ class ApplicationTest extends TestCase
 
     private static Client $httpClient;
     private static string $fixturePath;
+    private static YamlFileCollectionSerializer $yamlFileCollectionSerializer;
 
     public static function setUpBeforeClass(): void
     {
@@ -25,6 +32,12 @@ class ApplicationTest extends TestCase
             'verify' => false,
         ]);
         self::$fixturePath = (string) realpath(getcwd() . '/../fixtures');
+
+        self::$yamlFileCollectionSerializer = new YamlFileCollectionSerializer(
+            new FileHashesSerializer(
+                new YamlDumper()
+            )
+        );
     }
 
     public function testCreateJob(): void
@@ -34,7 +47,7 @@ class ApplicationTest extends TestCase
                 'label' => self::JOB_LABEL,
                 'event_delivery_url' => self::EVENT_DELIVERY_URL,
                 'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
-                'source' => 'source content',
+                'source' => $this->createJobSource(['test.yml'], ['test.yml'])
             ],
         ]);
         self::assertSame(200, $createJobResponse->getStatusCode());
@@ -152,5 +165,42 @@ class ApplicationTest extends TestCase
         self::assertContains($job['execution_state'], $expectedJobData['execution_states']);
         self::assertContains($job['callback_state'], $expectedJobData['callback_states']);
         self::assertSame($job['tests'], $expectedJobData['tests']);
+    }
+
+    /**
+     * @param string[] $manifestPaths
+     * @param string[] $sourcePaths
+     */
+    private function createJobSource(array $manifestPaths, array $sourcePaths): string
+    {
+        $yamlFiles = [
+            YamlFile::create('manifest.yaml', $this->createManifestContent($manifestPaths))
+        ];
+
+        $fileHashes = new FileHashes();
+        foreach ($sourcePaths as $sourcePath) {
+            $content = (string) file_get_contents(self::$fixturePath . '/basil/' . $sourcePath);
+
+            $yamlFiles[] = YamlFile::create($sourcePath, $content);
+            $fileHashes->add($sourcePath, md5($content));
+        }
+
+        $yamlFileCollection = new ArrayCollection($yamlFiles);
+
+        return self::$yamlFileCollectionSerializer->serialize($yamlFileCollection);
+    }
+
+    /**
+     * @param string[] $manifestPaths
+     */
+    private function createManifestContent(array $manifestPaths): string
+    {
+        $lines = [];
+
+        foreach ($manifestPaths as $path) {
+            $lines[] = '- ' . $path;
+        }
+
+        return implode("\n", $lines);
     }
 }
