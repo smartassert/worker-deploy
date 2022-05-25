@@ -72,11 +72,12 @@ variable "worker_version" {
 
 source "digitalocean" "worker_base" {
   api_token     = "${var.digitalocean_api_token}"
-  image         = "ubuntu-20-04-x64"
+  image         = "ubuntu-22-04-x64"
   region        = "lon1"
   size          = "s-1vcpu-1gb"
   snapshot_name = "worker-${var.snapshot_name}"
   ssh_username  = "root"
+  temporary_key_pair_type = "ed25519"
 }
 
 build {
