@@ -60,7 +60,7 @@ DB_TABLES=(
   "job"
   "test"
   "test_configuration"
-  "callback_entity"
+  "worker_event"
   "source"
 )
 
