@@ -24,7 +24,7 @@ sudo \
 cd ./self-test/app || exit
 
 sudo apt-get -qq update > /dev/null
-sudo apt-get -qq install php7.4-cli php7.4-curl php7.4-dom php7.4-mbstring zip > /dev/null
+sudo apt-get -qq install php8.1-cli php8.1-curl php8.1-dom php8.1-mbstring zip > /dev/null
 curl https://getcomposer.org/download/latest-stable/composer.phar --output composer.phar --silent
 
 if ! php composer.phar update --quiet; then
@@ -60,7 +60,7 @@ DB_TABLES=(
   "job"
   "test"
   "test_configuration"
-  "callback_entity"
+  "worker_event"
   "source"
 )
 
@@ -70,7 +70,7 @@ for TABLE in "${DB_TABLES[@]}"
     sudo docker-compose exec -T -e PGPASSWORD=password! postgres psql -U postgres -d worker-db -c "DELETE FROM ${TABLE}"
   done
 
-sudo apt-get -qq -y remove php7.4-cli php7.4-curl php7.4-dom php7.4-mbstring zip > /dev/null
+sudo apt-get -qq -y remove php8.1-cli php8.1-curl php8.1-dom php8.1-mbstring zip > /dev/null
 sudo apt-get -qq -y autoremove > /dev/null
 sudo rm -Rf ./self-test
 

@@ -6,16 +6,22 @@ namespace App;
 
 use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;
+use SmartAssert\YamlFile\Collection\ArrayCollection;
+use SmartAssert\YamlFile\Collection\Serializer as YamlFileCollectionSerializer;
+use SmartAssert\YamlFile\FileHashes\Serializer as FileHashesSerializer;
+use SmartAssert\YamlFile\YamlFile;
+use Symfony\Component\Yaml\Dumper as YamlDumper;
 
 class ApplicationTest extends TestCase
 {
     private const JOB_LABEL = 'job-label-content';
     private const JOB_MAXIMUM_DURATION_IN_SECONDS = 600;
 
-    private const CALLBACK_URL = 'http://callback-receiver:8080/';
+    private const EVENT_DELIVERY_URL = 'http://callback-receiver:8080/';
 
     private static Client $httpClient;
     private static string $fixturePath;
+    private static YamlFileCollectionSerializer $yamlFileCollectionSerializer;
 
     public static function setUpBeforeClass(): void
     {
@@ -25,6 +31,12 @@ class ApplicationTest extends TestCase
             'verify' => false,
         ]);
         self::$fixturePath = (string) realpath(getcwd() . '/../fixtures');
+
+        self::$yamlFileCollectionSerializer = new YamlFileCollectionSerializer(
+            new FileHashesSerializer(
+                new YamlDumper()
+            )
+        );
     }
 
     public function testCreateJob(): void
@@ -32,60 +44,37 @@ class ApplicationTest extends TestCase
         $createJobResponse = self::$httpClient->post('https://localhost/job', [
             'form_params' => [
                 'label' => self::JOB_LABEL,
-                'callback-url' => self::CALLBACK_URL,
-                'maximum-duration-in-seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
+                'event_delivery_url' => self::EVENT_DELIVERY_URL,
+                'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
+                'source' => $this->createJobSource(
+                    ['test.yml'],
+                    ['test.yml'],
+                    [
+                        'test.yml' => [
+                            '{{ BROWSER }}' => 'chrome',
+                        ],
+                    ]
+                ),
             ],
         ]);
         self::assertSame(200, $createJobResponse->getStatusCode());
         self::assertSame('application/json', $createJobResponse->getHeaderLine('content-type'));
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
-            'callback_url' => self::CALLBACK_URL,
+            'event_delivery_url' => self::EVENT_DELIVERY_URL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
-            'sources' => [],
-            'compilation_states' => ['awaiting'],
-            'execution_states' => ['awaiting'],
-            'callback_states' => ['awaiting'],
+            'sources' => [
+                'test.yml',
+            ],
+            'compilation_states' => ['awaiting', 'running', 'complete'],
+            'execution_states' => ['awaiting', 'running'],
+            'event_delivery_states' => ['awaiting', 'running', 'complete'],
             'tests' => [],
         ]);
     }
 
     /**
      * @depends testCreateJob
-     */
-    public function testAddSources(): void
-    {
-        $addSourcesResponse = self::$httpClient->post('https://localhost/add-sources', [
-            'multipart' => [
-                [
-                    'name' => base64_encode('manifest'),
-                    'contents' => (string) file_get_contents(self::$fixturePath . '/basil/manifest.txt'),
-                    'filename' => 'manifest.txt'
-                ],
-                $this->createFileUploadData('test.yml', [
-                    '{{ BROWSER }}' => 'chrome',
-                ]),
-            ],
-        ]);
-
-        self::assertSame(200, $addSourcesResponse->getStatusCode());
-        self::assertSame('application/json', $addSourcesResponse->getHeaderLine('content-type'));
-        $this->assertJobStatus([
-            'label' => self::JOB_LABEL,
-            'callback_url' => self::CALLBACK_URL,
-            'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
-            'sources' => [
-                'test.yml',
-            ],
-            'compilation_states' => ['running', 'complete'],
-            'execution_states' => ['awaiting'],
-            'callback_states' => ['awaiting', 'running'],
-            'tests' => [],
-        ]);
-    }
-
-    /**
-     * @depends testAddSources
      */
     public function testWaitForApplicationComplete(): void
     {
@@ -97,7 +86,11 @@ class ApplicationTest extends TestCase
         while ($duration < $timeout && false === $isComplete) {
             $job = $this->getJobStatus();
 
-            $isComplete = 'complete' === $job['compilation_state'] && 'complete' === $job['execution_state'] && 'complete' === $job['callback_state'];
+            $isComplete =
+                'complete' === $job['compilation_state'] &&
+                'complete' === $job['execution_state'] &&
+                'complete' === $job['event_delivery_state'];
+
             $duration = $duration + $interval;
 
             sleep($interval);
@@ -120,23 +113,6 @@ class ApplicationTest extends TestCase
     }
 
     /**
-     * @param array<mixed> $replacements
-     *
-     * @return array<string, string>
-     */
-    private function createFileUploadData(string $path, array $replacements = []): array
-    {
-        $contents = (string) file_get_contents(self::$fixturePath . '/basil/' . $path);
-        $contents = str_replace(array_keys($replacements), array_values($replacements), $contents);
-
-        return [
-            'name' => base64_encode($path),
-            'contents' => $contents,
-            'filename' => $path
-        ];
-    }
-
-    /**
      * @param array<mixed> $expectedJobData
      */
     private function assertJobStatus(array $expectedJobData): void
@@ -144,12 +120,81 @@ class ApplicationTest extends TestCase
         $job = $this->getJobStatus();
 
         self::assertSame($expectedJobData['label'], $job['label']);
-        self::assertSame($expectedJobData['callback_url'], $job['callback_url']);
+        self::assertSame($expectedJobData['event_delivery_url'], $job['event_delivery_url']);
         self::assertSame($expectedJobData['maximum_duration_in_seconds'], $job['maximum_duration_in_seconds']);
         self::assertSame($expectedJobData['sources'], $job['sources']);
-        self::assertContains($job['compilation_state'], $expectedJobData['compilation_states']);
-        self::assertContains($job['execution_state'], $expectedJobData['execution_states']);
-        self::assertContains($job['callback_state'], $expectedJobData['callback_states']);
+        self::assertContains(
+            $job['compilation_state'],
+            $expectedJobData['compilation_states'],
+            sprintf(
+                'Compilation state "%s" not in expected states "%s"',
+                $job['compilation_state'],
+                implode(', ', $expectedJobData['compilation_states'])
+            )
+        );
+        self::assertContains(
+            $job['execution_state'],
+            $expectedJobData['execution_states'],
+            sprintf(
+                'Execution state "%s" not in expected states "%s"',
+                $job['execution_state'],
+                implode(', ', $expectedJobData['execution_states'])
+            )
+        );
+        self::assertContains(
+            $job['event_delivery_state'],
+            $expectedJobData['event_delivery_states'],
+            sprintf(
+                'Event delivery state "%s" not in expected states "%s"',
+                $job['event_delivery_state'],
+                implode(', ', $expectedJobData['event_delivery_states'])
+            )
+        );
         self::assertSame($job['tests'], $expectedJobData['tests']);
+    }
+
+    /**
+     * @param string[] $manifestPaths
+     * @param string[] $sourcePaths
+     * @param array<string, array<string, string>> $sourceContentReplacements
+     */
+    private function createJobSource(
+        array $manifestPaths,
+        array $sourcePaths,
+        array $sourceContentReplacements = []
+    ): string {
+        $yamlFiles = [
+            YamlFile::create('manifest.yaml', $this->createManifestContent($manifestPaths))
+        ];
+
+        foreach ($sourcePaths as $sourcePath) {
+            $content = trim((string) file_get_contents(self::$fixturePath . '/basil/' . $sourcePath));
+
+            $replacements = $sourceContentReplacements[$sourcePath] ?? null;
+            if (is_array($replacements)) {
+                foreach ($replacements as $search => $replace) {
+                    $content = str_replace($search, $replace, $content);
+                }
+            }
+
+            $yamlFiles[] = YamlFile::create($sourcePath, $content);
+        }
+
+        $yamlFileCollection = new ArrayCollection($yamlFiles);
+
+        return self::$yamlFileCollectionSerializer->serialize($yamlFileCollection);
+    }
+
+    /**
+     * @param string[] $manifestPaths
+     */
+    private function createManifestContent(array $manifestPaths): string
+    {
+        $lines = [];
+        foreach ($manifestPaths as $path) {
+            $lines[] = '- ' . $path;
+        }
+
+        return implode("\n", $lines);
     }
 }

@@ -56,81 +56,120 @@ class CallbackReceiverLogTest extends TestCase
                 'expectedLogSectionBodies' => [
                     [
                         'label' => self::JOB_LABEL,
+                        'identifier' => 1,
                         'type' => 'job/started',
-                        'payload' => [],
-                    ],
-                    [
-                        'label' => self::JOB_LABEL,
-                        'type' => 'compilation/started',
+                        'reference' => md5(self::JOB_LABEL),
                         'payload' => [
-                            'source' => 'test.yml',
-                        ],
-                    ],
-                    [
-                        'label' => self::JOB_LABEL,
-                        'type' => 'compilation/passed',
-                        'payload' => [
-                            'source' => 'test.yml',
-                        ],
-                    ],
-                    [
-                        'label' => self::JOB_LABEL,
-                        'type' => 'compilation/completed',
-                        'payload' => [],
-                    ],
-                    [
-                        'label' => self::JOB_LABEL,
-                        'type' => 'execution/started',
-                        'payload' => [],
-                    ],
-                    [
-                        'label' => self::JOB_LABEL,
-                        'type' => 'test/started',
-                        'payload' => [
-                            'type' => 'test',
-                            'path' => 'test.yml',
-                            'config' => [
-                                'browser' => 'chrome',
-                                'url' => 'http://http-fixtures',
+                            'tests' => [
+                                'test.yml',
                             ],
                         ],
                     ],
                     [
                         'label' => self::JOB_LABEL,
-                        'type' => 'step/passed',
+                        'identifier' => 2,
+                        'type' => 'compilation/started',
+                        'reference' => md5(self::JOB_LABEL . 'test.yml'),
                         'payload' => [
-                            'type' => 'step',
-                            'name' => 'verify page is open',
-                            'status' => 'passed',
-                            'statements' => [
-                                [
-                                    'type' => 'assertion',
-                                    'source' => '$page.url is "http://http-fixtures/"',
-                                    'status' => 'passed',
+                            'source' => 'test.yml',
+                        ],
+                    ],
+                    [
+                        'label' => self::JOB_LABEL,
+                        'identifier' => 3,
+                        'type' => 'compilation/passed',
+                        'reference' => md5(self::JOB_LABEL . 'test.yml'),
+                        'payload' => [
+                            'source' => 'test.yml',
+                        ],
+                    ],
+                    [
+                        'label' => self::JOB_LABEL,
+                        'identifier' => 4,
+                        'type' => 'job/compiled',
+                        'reference' => md5(self::JOB_LABEL),
+                        'payload' => [],
+                    ],
+                    [
+                        'label' => self::JOB_LABEL,
+                        'identifier' => 5,
+                        'type' => 'execution/started',
+                        'reference' => md5(self::JOB_LABEL),
+                        'payload' => [],
+                    ],
+                    [
+                        'label' => self::JOB_LABEL,
+                        'identifier' => 6,
+                        'type' => 'test/started',
+                        'reference' => md5(self::JOB_LABEL . 'test.yml'),
+                        'payload' => [
+                            'source' => 'test.yml',
+                            'document' => [
+                                'type' => 'test',
+                                'payload' => [
+                                    'path' => 'test.yml',
+                                    'config' => [
+                                        'browser' => 'chrome',
+                                        'url' => 'http://http-fixtures',
+                                    ],
                                 ],
                             ],
                         ],
                     ],
                     [
                         'label' => self::JOB_LABEL,
-                        'type' => 'test/passed',
+                        'identifier' => 7,
+                        'type' => 'step/passed',
+                        'reference' => md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
                         'payload' => [
-                            'type' => 'test',
-                            'path' => 'test.yml',
-                            'config' => [
-                                'browser' => 'chrome',
-                                'url' => 'http://http-fixtures',
+                            'source' => 'test.yml',
+                            'document' => [
+                                'type' => 'step',
+                                'payload' => [
+                                    'name' => 'verify page is open',
+                                    'status' => 'passed',
+                                    'statements' => [
+                                        [
+                                            'type' => 'assertion',
+                                            'source' => '$page.url is "http://http-fixtures/"',
+                                            'status' => 'passed',
+                                        ],
+                                    ],
+                                ],
                             ],
                         ],
                     ],
                     [
                         'label' => self::JOB_LABEL,
+                        'identifier' => 8,
+                        'type' => 'test/passed',
+                        'reference' => md5(self::JOB_LABEL . 'test.yml'),
+                        'payload' => [
+                            'source' => 'test.yml',
+                            'document' => [
+                                'type' => 'test',
+                                'payload' => [
+                                    'path' => 'test.yml',
+                                    'config' => [
+                                        'browser' => 'chrome',
+                                        'url' => 'http://http-fixtures',
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                    [
+                        'label' => self::JOB_LABEL,
+                        'identifier' => 9,
                         'type' => 'execution/completed',
+                        'reference' => md5(self::JOB_LABEL),
                         'payload' => [],
                     ],
                     [
                         'label' => self::JOB_LABEL,
+                        'identifier' => 10,
                         'type' => 'job/completed',
+                        'reference' => md5(self::JOB_LABEL),
                         'payload' => [],
                     ],
                 ],
