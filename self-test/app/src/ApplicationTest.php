@@ -6,16 +6,23 @@ namespace App;
 
 use GuzzleHttp\Client;
 use PHPUnit\Framework\TestCase;
+use SmartAssert\YamlFile\Collection\ArrayCollection;
+use SmartAssert\YamlFile\Collection\Serializer as YamlFileCollectionSerializer;
+use SmartAssert\YamlFile\FileHashes;
+use SmartAssert\YamlFile\FileHashes\Serializer as FileHashesSerializer;
+use SmartAssert\YamlFile\YamlFile;
+use Symfony\Component\Yaml\Dumper as YamlDumper;
 
 class ApplicationTest extends TestCase
 {
     private const JOB_LABEL = 'job-label-content';
     private const JOB_MAXIMUM_DURATION_IN_SECONDS = 600;
 
-    private const CALLBACK_URL = 'http://callback-receiver:8080/';
+    private const EVENT_DELIVERY_URL = 'http://callback-receiver:8080/';
 
     private static Client $httpClient;
     private static string $fixturePath;
+    private static YamlFileCollectionSerializer $yamlFileCollectionSerializer;
 
     public static function setUpBeforeClass(): void
     {
@@ -25,6 +32,12 @@ class ApplicationTest extends TestCase
             'verify' => false,
         ]);
         self::$fixturePath = (string) realpath(getcwd() . '/../fixtures');
+
+        self::$yamlFileCollectionSerializer = new YamlFileCollectionSerializer(
+            new FileHashesSerializer(
+                new YamlDumper()
+            )
+        );
     }
 
     public function testCreateJob(): void
@@ -32,15 +45,16 @@ class ApplicationTest extends TestCase
         $createJobResponse = self::$httpClient->post('https://localhost/job', [
             'form_params' => [
                 'label' => self::JOB_LABEL,
-                'callback-url' => self::CALLBACK_URL,
-                'maximum-duration-in-seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
+                'event_delivery_url' => self::EVENT_DELIVERY_URL,
+                'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
+                'source' => $this->createJobSource(['test.yml'], ['test.yml'])
             ],
         ]);
         self::assertSame(200, $createJobResponse->getStatusCode());
         self::assertSame('application/json', $createJobResponse->getHeaderLine('content-type'));
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
-            'callback_url' => self::CALLBACK_URL,
+            'event_delivery_url' => self::EVENT_DELIVERY_URL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             'sources' => [],
             'compilation_states' => ['awaiting'],
@@ -72,7 +86,7 @@ class ApplicationTest extends TestCase
         self::assertSame('application/json', $addSourcesResponse->getHeaderLine('content-type'));
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
-            'callback_url' => self::CALLBACK_URL,
+            'event_delivery_url' => self::EVENT_DELIVERY_URL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             'sources' => [
                 'test.yml',
@@ -144,12 +158,49 @@ class ApplicationTest extends TestCase
         $job = $this->getJobStatus();
 
         self::assertSame($expectedJobData['label'], $job['label']);
-        self::assertSame($expectedJobData['callback_url'], $job['callback_url']);
+        self::assertSame($expectedJobData['event_delivery_url'], $job['event_delivery_url']);
         self::assertSame($expectedJobData['maximum_duration_in_seconds'], $job['maximum_duration_in_seconds']);
         self::assertSame($expectedJobData['sources'], $job['sources']);
         self::assertContains($job['compilation_state'], $expectedJobData['compilation_states']);
         self::assertContains($job['execution_state'], $expectedJobData['execution_states']);
         self::assertContains($job['callback_state'], $expectedJobData['callback_states']);
         self::assertSame($job['tests'], $expectedJobData['tests']);
+    }
+
+    /**
+     * @param string[] $manifestPaths
+     * @param string[] $sourcePaths
+     */
+    private function createJobSource(array $manifestPaths, array $sourcePaths): string
+    {
+        $yamlFiles = [
+            YamlFile::create('manifest.yaml', $this->createManifestContent($manifestPaths))
+        ];
+
+        $fileHashes = new FileHashes();
+        foreach ($sourcePaths as $sourcePath) {
+            $content = (string) file_get_contents(self::$fixturePath . '/basil/' . $sourcePath);
+
+            $yamlFiles[] = YamlFile::create($sourcePath, $content);
+            $fileHashes->add($sourcePath, md5($content));
+        }
+
+        $yamlFileCollection = new ArrayCollection($yamlFiles);
+
+        return self::$yamlFileCollectionSerializer->serialize($yamlFileCollection);
+    }
+
+    /**
+     * @param string[] $manifestPaths
+     */
+    private function createManifestContent(array $manifestPaths): string
+    {
+        $lines = [];
+
+        foreach ($manifestPaths as $path) {
+            $lines[] = '- ' . $path;
+        }
+
+        return implode("\n", $lines);
     }
 }
