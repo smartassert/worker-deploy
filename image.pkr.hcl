@@ -162,16 +162,16 @@ build {
     source      = "self-test/services.yml"
   }
 
-#  provisioner "shell" {
-#    environment_vars = [
-#      "LOCAL_SOURCE_PATH=/var/basil/source",
-#      "COMPILER_VERSION=${var.compiler_version}",
-#      "CHROME_RUNNER_VERSION=${var.chrome_runner_version}",
-#      "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
-#      "DELEGATOR_VERSION=${var.delegator_version}",
-#      "WORKER_VERSION=${var.worker_version}",
-#    ]
-#    scripts = ["./self-test/app.sh"]
-#  }
+  provisioner "shell" {
+    environment_vars = [
+      "LOCAL_SOURCE_PATH=/var/basil/source",
+      "COMPILER_VERSION=${var.compiler_version}",
+      "CHROME_RUNNER_VERSION=${var.chrome_runner_version}",
+      "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
+      "DELEGATOR_VERSION=${var.delegator_version}",
+      "WORKER_VERSION=${var.worker_version}",
+    ]
+    scripts = ["./self-test/app.sh"]
+  }
 
 }
