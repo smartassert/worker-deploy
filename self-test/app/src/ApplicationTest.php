@@ -59,6 +59,7 @@ class ApplicationTest extends TestCase
         ]);
         self::assertSame(200, $createJobResponse->getStatusCode());
         self::assertSame('application/json', $createJobResponse->getHeaderLine('content-type'));
+
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
             'event_delivery_url' => self::EVENT_DELIVERY_URL,
@@ -66,10 +67,13 @@ class ApplicationTest extends TestCase
             'sources' => [
                 'test.yml',
             ],
+            'tests' => [],
+        ]);
+
+        $this->assertApplicationState([
             'compilation_states' => ['awaiting', 'running', 'complete'],
             'execution_states' => ['awaiting', 'running'],
             'event_delivery_states' => ['awaiting', 'running', 'complete'],
-            'tests' => [],
         ]);
     }
 
@@ -84,12 +88,12 @@ class ApplicationTest extends TestCase
         $isComplete = false;
 
         while ($duration < $timeout && false === $isComplete) {
-            $job = $this->getJobStatus();
+            $applicationState = $this->getApplicationState();
 
             $isComplete =
-                'complete' === $job['compilation_state'] &&
-                'complete' === $job['execution_state'] &&
-                'complete' === $job['event_delivery_state'];
+                'complete' === $applicationState['compilation'] &&
+                'complete' === $applicationState['execution'] &&
+                'complete' === $applicationState['event_delivery'];
 
             $duration = $duration + $interval;
 
@@ -102,10 +106,18 @@ class ApplicationTest extends TestCase
     /**
      * @return array<mixed>
      */
-    private function getJobStatus(): array
+    private function getApplicationState(): array
     {
-        $response = self::$httpClient->get('https://localhost/job');
-        self::assertSame(200, $response->getStatusCode());
+        return $this->getJsonResponseAsArray('/application_state');
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    private function getJsonResponseAsArray(string $path): array
+    {
+        $response = self::$httpClient->get('https://localhost' . $path);
+        self::assertSame(200, $response->getStatusCode());;
 
         $data = json_decode($response->getBody()->getContents(), true);
 
@@ -113,44 +125,53 @@ class ApplicationTest extends TestCase
     }
 
     /**
-     * @param array<mixed> $expectedJobData
+     * @param array<mixed> $expected
      */
-    private function assertJobStatus(array $expectedJobData): void
+    private function assertJobStatus(array $expected): void
     {
-        $job = $this->getJobStatus();
+        $job = $this->getJsonResponseAsArray('/job');
 
-        self::assertSame($expectedJobData['label'], $job['label']);
-        self::assertSame($expectedJobData['event_delivery_url'], $job['event_delivery_url']);
-        self::assertSame($expectedJobData['maximum_duration_in_seconds'], $job['maximum_duration_in_seconds']);
-        self::assertSame($expectedJobData['sources'], $job['sources']);
+        self::assertSame($expected['label'], $job['label']);
+        self::assertSame($expected['event_delivery_url'], $job['event_delivery_url']);
+        self::assertSame($expected['maximum_duration_in_seconds'], $job['maximum_duration_in_seconds']);
+        self::assertSame($expected['sources'], $job['sources']);
+        self::assertSame($job['tests'], $expected['tests']);
+    }
+
+    /**
+     * @param array<mixed> $expected
+     */
+    private function assertApplicationState(array $expected): void
+    {
+        $applicationState = $this->getApplicationState();
+
         self::assertContains(
-            $job['compilation_state'],
-            $expectedJobData['compilation_states'],
+            $applicationState['compilation'],
+            $expected['compilation_states'],
             sprintf(
                 'Compilation state "%s" not in expected states "%s"',
-                $job['compilation_state'],
-                implode(', ', $expectedJobData['compilation_states'])
+                $applicationState['compilation'],
+                implode(', ', $expected['compilation_states'])
             )
         );
         self::assertContains(
-            $job['execution_state'],
-            $expectedJobData['execution_states'],
+            $applicationState['execution'],
+            $expected['execution_states'],
             sprintf(
                 'Execution state "%s" not in expected states "%s"',
-                $job['execution_state'],
-                implode(', ', $expectedJobData['execution_states'])
+                $applicationState['execution'],
+                implode(', ', $expected['execution_states'])
             )
         );
         self::assertContains(
-            $job['event_delivery_state'],
-            $expectedJobData['event_delivery_states'],
+            $applicationState['event_delivery'],
+            $expected['event_delivery_states'],
             sprintf(
                 'Event delivery state "%s" not in expected states "%s"',
-                $job['event_delivery_state'],
-                implode(', ', $expectedJobData['event_delivery_states'])
+                $applicationState['event_delivery'],
+                implode(', ', $expected['event_delivery_states'])
             )
         );
-        self::assertSame($job['tests'], $expectedJobData['tests']);
     }
 
     /**
