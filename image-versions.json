@@ -3,5 +3,5 @@
   "chrome_runner": "0.21",
   "firefox_runner": "0.21",
   "delegator": "0.8",
-  "worker": "4.0-debug-001"
+  "worker": "4.0-debug-002"
 }
