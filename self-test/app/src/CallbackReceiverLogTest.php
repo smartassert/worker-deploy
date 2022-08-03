@@ -55,54 +55,90 @@ class CallbackReceiverLogTest extends TestCase
             'default' => [
                 'expectedLogSectionBodies' => [
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 1,
-                        'type' => 'job/started',
-                        'reference' => md5(self::JOB_LABEL),
-                        'payload' => [
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 1,
+                            'type' => 'job/started',
+                            'label' => 'job-label-content',
+                            'reference' => md5(self::JOB_LABEL),
+                            'related_references' => [
+                                [
+                                    'label' => 'test.yml',
+                                    'reference'=> md5(self::JOB_LABEL . 'test.yml'),
+                                ],
+                            ],
+                        ],
+                        'body' => [
                             'tests' => [
                                 'test.yml',
                             ],
                         ],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 2,
-                        'type' => 'compilation/started',
-                        'reference' => md5(self::JOB_LABEL . 'test.yml'),
-                        'payload' => [
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 2,
+                            'type' => 'compilation/started',
+                            'label' => 'test.yml',
+                            'reference' => md5(self::JOB_LABEL . 'test.yml'),
+                        ],
+                        'body' => [
                             'source' => 'test.yml',
                         ],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 3,
-                        'type' => 'compilation/passed',
-                        'reference' => md5(self::JOB_LABEL . 'test.yml'),
-                        'payload' => [
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 3,
+                            'type' => 'compilation/passed',
+                            'label' => 'test.yml',
+                            'reference' => md5(self::JOB_LABEL . 'test.yml'),
+                            'related_references' => [
+                                [
+                                    'label' => 'verify page is open',
+                                    'reference'=> md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
+                                ],
+                            ],
+                        ],
+                        'body' => [
                             'source' => 'test.yml',
                         ],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 4,
-                        'type' => 'job/compiled',
-                        'reference' => md5(self::JOB_LABEL),
-                        'payload' => [],
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 4,
+                            'type' => 'job/compiled',
+                            'label' => self::JOB_LABEL,
+                            'reference' => md5(self::JOB_LABEL),
+                        ],
+                        'body' => [],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 5,
-                        'type' => 'execution/started',
-                        'reference' => md5(self::JOB_LABEL),
-                        'payload' => [],
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 5,
+                            'type' => 'execution/started',
+                            'label' => self::JOB_LABEL,
+                            'reference' => md5(self::JOB_LABEL),
+                        ],
+                        'body' => [],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 6,
-                        'type' => 'test/started',
-                        'reference' => md5(self::JOB_LABEL . 'test.yml'),
-                        'payload' => [
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 6,
+                            'type' => 'test/started',
+                            'label' => 'test.yml',
+                            'reference' => md5(self::JOB_LABEL . 'test.yml'),
+                            'related_references' => [
+                                [
+                                    'label' => 'verify page is open',
+                                    'reference'=> md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
+                                ],
+                            ],
+                        ],
+                        'body' => [
                             'source' => 'test.yml',
                             'document' => [
                                 'type' => 'test',
@@ -114,14 +150,20 @@ class CallbackReceiverLogTest extends TestCase
                                     ],
                                 ],
                             ],
+                            'step_names' => [
+                                'verify page is open',
+                            ],
                         ],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 7,
-                        'type' => 'step/passed',
-                        'reference' => md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
-                        'payload' => [
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 7,
+                            'type' => 'step/passed',
+                            'label' => 'verify page is open',
+                            'reference' => md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
+                        ],
+                        'body' => [
                             'source' => 'test.yml',
                             'document' => [
                                 'type' => 'step',
@@ -137,14 +179,24 @@ class CallbackReceiverLogTest extends TestCase
                                     ],
                                 ],
                             ],
+                            'name' => 'verify page is open',
                         ],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 8,
-                        'type' => 'test/passed',
-                        'reference' => md5(self::JOB_LABEL . 'test.yml'),
-                        'payload' => [
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 8,
+                            'type' => 'test/passed',
+                            'label' => 'test.yml',
+                            'reference' => md5(self::JOB_LABEL . 'test.yml'),
+                            'related_references' => [
+                                [
+                                    'label' => 'verify page is open',
+                                    'reference'=> md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
+                                ],
+                            ],
+                        ],
+                        'body' => [
                             'source' => 'test.yml',
                             'document' => [
                                 'type' => 'test',
@@ -156,21 +208,30 @@ class CallbackReceiverLogTest extends TestCase
                                     ],
                                 ],
                             ],
+                            'step_names' => [
+                                'verify page is open',
+                            ],
                         ],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 9,
-                        'type' => 'execution/completed',
-                        'reference' => md5(self::JOB_LABEL),
-                        'payload' => [],
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 9,
+                            'type' => 'execution/completed',
+                            'label' => self::JOB_LABEL,
+                            'reference' => md5(self::JOB_LABEL),
+                        ],
+                        'body' => [],
                     ],
                     [
-                        'label' => self::JOB_LABEL,
-                        'identifier' => 10,
-                        'type' => 'job/completed',
-                        'reference' => md5(self::JOB_LABEL),
-                        'payload' => [],
+                        'header' => [
+                            'job' => self::JOB_LABEL,
+                            'sequence_number' => 10,
+                            'type' => 'job/completed',
+                            'label' => self::JOB_LABEL,
+                            'reference' => md5(self::JOB_LABEL),
+                        ],
+                        'body' => [],
                     ],
                 ],
             ],
