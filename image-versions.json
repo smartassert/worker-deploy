@@ -1,7 +1,7 @@
 {
-  "compiler": "5.0",
-  "chrome_runner": "0.21",
-  "firefox_runner": "0.21",
-  "delegator": "0.8",
-  "worker": "7.0"
+  "compiler": "6.0",
+  "chrome_runner": "1.0",
+  "firefox_runner": "1.0",
+  "delegator": "1.0.2",
+  "worker": "9.0"
 }
