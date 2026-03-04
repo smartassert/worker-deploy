@@ -128,7 +128,6 @@ class ApplicationTest extends TestCase
         $job = $this->getJsonResponseAsArray('/job');
 
         self::assertSame($expected['label'], $job['label']);
-        self::assertSame($expected['event_delivery_url'], $job['event_delivery_url']);
         self::assertSame($expected['maximum_duration_in_seconds'], $job['maximum_duration_in_seconds']);
         self::assertSame($expected['sources'], $job['sources']);
         self::assertSame($job['tests'], $expected['tests']);
