@@ -2,7 +2,7 @@
 
 INITIAL_DIRECTORY=$PWD
 
-TEST_RESULTS_BASE_URL = 'http://callback-receiver:8080';
+TEST_RESULTS_BASE_URL='http://callback-receiver:8080';
 
 # Setup
 sudo \
