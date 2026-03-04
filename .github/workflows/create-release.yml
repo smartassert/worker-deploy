@@ -18,7 +18,7 @@ jobs:
     outputs:
       commit-hash: ${{ github.event.inputs.commit-hash }}
       should-release: ${{ github.event.inputs.should-release }}
-      release-notes-path: ${{ steps.release-notes-path.outputs.value}}
+      release-notes-path: "release-notes.md"
       release-tag: ${{ steps.image-versions.outputs.worker }}
       compiler-version: ${{ steps.image-versions.outputs.compiler }}
       chrome-runner-version: ${{ steps.image-versions.outputs.chrome_runner }}
@@ -28,12 +28,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.commit-hash }}
 
       - name: Checkout bash-ga-ci-tools
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           repository: smartassert/bash-ga-ci-tools
           path: ./vendor/smartassert/bash-ga-ci-tools
@@ -43,10 +43,6 @@ jobs:
         id: image-versions
         run: ./vendor/smartassert/bash-ga-ci-tools/src/create-ga-outputs-from-json-scalar-object.sh < ./image-versions.json
 
-      - name: Set release notes path
-        id: release-notes-path
-        run: echo "::set-output name=value::release-notes.md"
-
   verify-setup:
     name: Verify setup
     runs-on: ubuntu-latest
@@ -54,7 +50,7 @@ jobs:
 
     steps:
       - name: Checkout bash-ga-ci-tools
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           repository: smartassert/bash-ga-ci-tools
           path: ./vendor/smartassert/bash-ga-ci-tools
@@ -75,7 +71,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           ref: ${{ needs.setup.outputs.commit-hash }}
 
