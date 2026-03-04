@@ -87,9 +87,9 @@ class ApplicationTest extends TestCase
             $applicationState = $this->getApplicationState();
 
             $isComplete =
-                'complete' === $applicationState['compilation'] &&
-                'complete' === $applicationState['execution'] &&
-                'complete' === $applicationState['event_delivery'];
+                'complete' === $applicationState['compilation']['state'] &&
+                'complete' === $applicationState['execution']['state'] &&
+                'complete' === $applicationState['event_delivery']['state'];
 
             $duration = $duration + $interval;
 
@@ -140,30 +140,34 @@ class ApplicationTest extends TestCase
     {
         $applicationState = $this->getApplicationState();
 
+        $compilationState = $applicationState['compilation']['state'];
+        $executionState = $applicationState['execution']['state'];
+        $eventDeliveryState = $applicationState['event_delivery']['state'];
+
         self::assertContains(
-            $applicationState['compilation'],
+            $compilationState,
             $expected['compilation_states'],
             sprintf(
                 'Compilation state "%s" not in expected states "%s"',
-                $applicationState['compilation'],
+                $compilationState,
                 implode(', ', $expected['compilation_states'])
             )
         );
         self::assertContains(
-            $applicationState['execution'],
+            $executionState,
             $expected['execution_states'],
             sprintf(
                 'Execution state "%s" not in expected states "%s"',
-                $applicationState['execution'],
+                $executionState,
                 implode(', ', $expected['execution_states'])
             )
         );
         self::assertContains(
-            $applicationState['event_delivery'],
+            $eventDeliveryState,
             $expected['event_delivery_states'],
             sprintf(
                 'Event delivery state "%s" not in expected states "%s"',
-                $applicationState['event_delivery'],
+                $eventDeliveryState,
                 implode(', ', $expected['event_delivery_states'])
             )
         );
