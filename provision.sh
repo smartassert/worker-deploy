@@ -8,38 +8,35 @@ function run_command_until_successful () {
   done
 }
 
+# Add Docker's official
 run_command_until_successful sudo apt-get update
 run_command_until_successful sudo apt-get install -y \
-    apt-transport-https \
     ca-certificates \
-    curl \
-    gnupg \
-    gnupg-agent \
-    lsb-release \
-    software-properties-common
+    curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
 
- curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+# Add Docker apt repository
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
 
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+run_command_until_successful sudo apt update
 
-run_command_until_successful sudo apt-get update
 run_command_until_successful sudo apt-get install -y \
-    docker-ce \
-    docker-ce-cli \
-    containerd.io
+  docker-ce \
+  docker-ce-cli \
+  containerd.io \
+  docker-buildx-plugin \
+  docker-compose-plugin
 
 run_command_until_successful sudo apt-get autoremove -y
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-DOCKER_COMPOSE_BIN=/usr/local/bin/docker-compose
-if [ ! -f "$DOCKER_COMPOSE_BIN" ]; then
-  sudo curl \
-    -L "https://github.com/docker/compose/releases/download/1.27.4/docker-compose-$(uname -s)-$(uname -m)" \
-    -o /usr/local/bin/docker-compose
-  sudo chmod +x /usr/local/bin/docker-compose
-fi
 
 mkdir -p /var/basil/source
 chown -R www-data:www-data /var/basil/source
@@ -55,6 +52,8 @@ sudo \
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  docker-compose up -d
-sudo docker-compose exec -T app php bin/console doctrine:database:create --if-not-exists
-sudo docker-compose exec -T app php bin/console doctrine:schema:update --force
+  docker compose up -d
+
+sleep 10
+sudo docker compose exec -T app php bin/console doctrine:database:create --if-not-exists
+sudo docker compose exec -T app php bin/console doctrine:schema:update --force
