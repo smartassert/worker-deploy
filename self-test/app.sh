@@ -43,8 +43,8 @@ fi
 php ./vendor/bin/phpunit ./src/ApplicationTest.php
 LAST_EXIT_CODE=$?
 
-#sudo docker logs callback-receiver | php ./vendor/bin/phpunit --stop-on-failure ./src/CallbackReceiverLogTest.php
-#LAST_EXIT_CODE=$?
+sudo docker logs callback-receiver | php ./vendor/bin/phpunit --stop-on-failure ./src/CallbackReceiverLogTest.php
+LAST_EXIT_CODE=$?
 
 ## Teardown
 cd "$INITIAL_DIRECTORY" || exit
