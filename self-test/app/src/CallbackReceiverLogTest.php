@@ -24,6 +24,11 @@ class CallbackReceiverLogTest extends TestCase
 
     public function testLogSize(): void
     {
+        ini_set('xdebug.var_display_max_data', '-1');
+        ini_set('xdebug.var_display_max_depth', '-1');
+
+        var_dump(self::$logSections);
+
         self::assertCount(10, self::$logSections);
     }
 
