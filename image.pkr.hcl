@@ -70,6 +70,16 @@ variable "worker_version" {
   }
 }
 
+variable "results_base_url" {
+  type = string
+  default = env("RESULTS_BASE_URL")
+
+  validation {
+    condition     = length(var.results_base_url) > 0
+    error_message = "Results base URL is required."
+  }
+}
+
 source "digitalocean" "worker_base" {
   api_token     = "${var.digitalocean_api_token}"
   image         = "ubuntu-22-04-x64"
@@ -114,6 +124,7 @@ build {
       "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
       "DELEGATOR_VERSION=${var.delegator_version}",
       "WORKER_VERSION=${var.worker_version}",
+      "RESULTS_BASE_URL=${var.results_base_url}",
     ]
     scripts = ["./provision.sh"]
   }
@@ -170,6 +181,7 @@ build {
       "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
       "DELEGATOR_VERSION=${var.delegator_version}",
       "WORKER_VERSION=${var.worker_version}",
+      "RESULTS_BASE_URL=${var.results_base_url}",
     ]
     scripts = ["./self-test/app.sh"]
   }
