@@ -57,9 +57,6 @@ class ApplicationTest extends TestCase
         self::assertSame(200, $createJobResponse->getStatusCode());
         self::assertSame('application/json', $createJobResponse->getHeaderLine('content-type'));
 
-        var_dump($createJobResponse->getBody()->getContents());
-        exit();
-
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
