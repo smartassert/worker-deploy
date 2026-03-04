@@ -18,6 +18,9 @@ sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyring
 sudo chmod a+r /etc/apt/keyrings/docker.asc
 
 # Add Docker apt repository
+# Intentionally disable shellcheck 1091 which isn't pleased with ". /etc/os-release"
+# This is third-party code that works and so is best left as-is
+# shellcheck disable=SC1091
 sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
 Types: deb
 URIs: https://download.docker.com/linux/ubuntu
