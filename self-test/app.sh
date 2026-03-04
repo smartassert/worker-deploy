@@ -2,6 +2,8 @@
 
 INITIAL_DIRECTORY=$PWD
 
+TEST_RESULTS_BASE_URL = 'http://callback-receiver:8080';
+
 # Setup
 sudo \
   LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
@@ -10,7 +12,7 @@ sudo \
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
+  RESULTS_BASE_URL="$TEST_RESULTS_BASE_URL" \
   docker compose -f docker-compose.yml -f self-test/services.yml build
 
 sudo \
@@ -20,7 +22,7 @@ sudo \
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
+  RESULTS_BASE_URL="$TEST_RESULTS_BASE_URL" \
   docker compose -f docker-compose.yml -f self-test/services.yml up -d
 
 cd ./self-test/app || exit
