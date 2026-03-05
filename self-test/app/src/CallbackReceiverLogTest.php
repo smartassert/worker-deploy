@@ -178,9 +178,7 @@ class CallbackReceiverLogTest extends TestCase
                                     ],
                                 ],
                             ],
-                            'step_names' => [
-                                'verify page is open',
-                            ],
+                            'name' => 'verify page is open',
                         ],
                         'label' => 'verify page is open',
                         'reference'=> md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
