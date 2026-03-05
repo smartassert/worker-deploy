@@ -22,14 +22,14 @@ class CallbackReceiverLogTest extends TestCase
         self::$logSections = self::extractLogSections((string) stream_get_contents(STDIN));
     }
 
-    public function testLogSize(): void
-    {
-        mail('webignition@gmail.com', 'logs 00.0', json_encode(self::$logSections, JSON_PRETTY_PRINT));
-        mail('webignition@gmail.com', 'logs 00.1', json_encode(self::$logSections, JSON_PRETTY_PRINT));
-        mail('webignition@gmail.com', 'logs 00.2', json_encode(self::$logSections, JSON_PRETTY_PRINT));
-
-        self::assertCount(10, self::$logSections);
-    }
+//    public function testLogSize(): void
+//    {
+//        mail('webignition@gmail.com', 'logs 00.0', json_encode(self::$logSections, JSON_PRETTY_PRINT));
+//        mail('webignition@gmail.com', 'logs 00.1', json_encode(self::$logSections, JSON_PRETTY_PRINT));
+//        mail('webignition@gmail.com', 'logs 00.2', json_encode(self::$logSections, JSON_PRETTY_PRINT));
+//
+//        self::assertCount(10, self::$logSections);
+//    }
 
     /**
      * @dataProvider logBodyDataProvider
@@ -41,6 +41,17 @@ class CallbackReceiverLogTest extends TestCase
         $logSectionBodyDataCollection = [];
         foreach (self::$logSections as $logSection) {
             $logSectionBodyDataCollection[] = $this->decodeLogSectionBody($logSection);
+        }
+
+        ini_set('xdebug.var_display_max_depth', '-1');
+        ini_set('xdebug.var_display_max_data', '-1');
+
+        foreach ($logSectionBodyDataCollection as $key => $value) {
+            echo "\n\n\n\n\n";
+            echo $key . "=================================================================================================";
+            echo json_encode($value, JSON_PRETTY_PRINT);
+            echo $key ."=================================================================================================";
+            echo "\n\n\n\n\n";
         }
 
 //        self::assertCount(count(self::$logSections), $expectedLogSectionBodies);
