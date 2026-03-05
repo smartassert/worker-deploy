@@ -93,6 +93,12 @@ source "digitalocean" "worker_base" {
 build {
   sources = ["source.digitalocean.worker_base"]
 
+  provisioner "shell" {
+    inline = [
+      "echo set debconf to Noninteractive",
+      "echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selections" ]
+  }
+
   # Copy system files and provision for use
   provisioner "file" {
     destination = "~/docker-compose.yml"
