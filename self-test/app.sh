@@ -72,8 +72,9 @@ sudo \
 DB_TABLES=(
   "job"
   "test"
-  "resource_reference"
   "worker_event"
+  "worker_event_reference"
+  "worker_event_worker_event_reference"
   "source"
 )
 
