@@ -59,5 +59,23 @@ sudo \
   docker compose up -d
 
 sleep 10
-sudo docker compose exec -T app php bin/console doctrine:database:create --if-not-exists
-sudo docker compose exec -T app php bin/console doctrine:schema:update --force
+
+sudo \
+  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+  COMPILER_VERSION="$COMPILER_VERSION" \
+  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+  WORKER_VERSION="$WORKER_VERSION" \
+  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
+  docker compose exec -T app php bin/console doctrine:database:create --if-not-exists
+
+sudo \
+  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+  COMPILER_VERSION="$COMPILER_VERSION" \
+  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+  WORKER_VERSION="$WORKER_VERSION" \
+  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
+  docker compose exec -T app php bin/console doctrine:schema:update --force
