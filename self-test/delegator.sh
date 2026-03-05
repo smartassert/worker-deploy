@@ -9,7 +9,17 @@ LOCAL_TARGET_PATH="/var/basil/tests"
 TEST_FILENAME="test-${BROWSER}.yml"
 
 sed "s/{{ BROWSER }}/${BROWSER}/g" ./self-test/fixtures/basil/test.yml | sudo tee "${LOCAL_SOURCE_PATH}/${TEST_FILENAME}"
-COMPILE_OUTPUT=$(sudo docker compose exec -T compiler ./compiler --source=/app/source/"${TEST_FILENAME}" --target=/app/tests)
+COMPILE_OUTPUT=$(
+  sudo \
+  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+  COMPILER_VERSION="$COMPILER_VERSION" \
+  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+  WORKER_VERSION="$WORKER_VERSION" \
+  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
+  docker compose exec -T compiler ./compiler --source=/app/source/"${TEST_FILENAME}" --target=/app/tests
+  )
 COMPILE_EXIT_CODE=$?
 if [ "${COMPILE_EXIT_CODE}" -ne 0 ]; then
     echo "${ICON_FAILED} compiler test failed"
@@ -22,7 +32,15 @@ COMPILED_TARGET=$(echo "${COMPILED_TARGET_LINE/target: /}" | xargs)
 
 docker run --name http-fixtures --network worker-network -p 8080:80 -v "${PWD}/self-test/fixtures/http":/usr/share/caddy:ro -d caddy:2.4.5-alpine
 
-sudo docker compose exec -T delegator ./bin/delegator  --browser "${BROWSER}" "${COMPILED_TARGET}"
+sudo \
+LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+COMPILER_VERSION="$COMPILER_VERSION" \
+CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+WORKER_VERSION="$WORKER_VERSION" \
+RESULTS_BASE_URL="$RESULTS_BASE_URL" \
+docker compose exec -T delegator ./bin/delegator  --browser "${BROWSER}" "${COMPILED_TARGET}"
 DELEGATOR_EXIT_CODE=$?
 if [ "$DELEGATOR_EXIT_CODE" -ne 0 ]; then
     echo "${ICON_FAILED} ${BROWSER} delegator test failed"

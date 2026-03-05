@@ -48,13 +48,13 @@ LAST_EXIT_CODE=$?
 cd "$INITIAL_DIRECTORY" || exit
 
 sudo \
-  LOCAL_SOURCE_PATH="non-empty-value" \
-  COMPILER_VERSION="non-empty-value" \
-  CHROME_RUNNER_VERSION="non-empty-value" \
-  FIREFOX_RUNNER_VERSION="non-empty-value" \
-  DELEGATOR_VERSION="non-empty-value" \
-  WORKER_VERSION="non-empty-value" \
-  RESULTS_BASE_URL="non-empty-value" \
+  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+  COMPILER_VERSION="$COMPILER_VERSION" \
+  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+  WORKER_VERSION="$WORKER_VERSION" \
+  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
   docker compose stop http-fixtures callback-receiver
 
 sudo \
@@ -80,13 +80,13 @@ for TABLE in "${DB_TABLES[@]}"
     echo "Removing all from $TABLE"
 
     sudo \
-      LOCAL_SOURCE_PATH="non-empty-value" \
-      COMPILER_VERSION="non-empty-value" \
-      CHROME_RUNNER_VERSION="non-empty-value" \
-      FIREFOX_RUNNER_VERSION="non-empty-value" \
-      DELEGATOR_VERSION="non-empty-value" \
-      WORKER_VERSION="non-empty-value" \
-      RESULTS_BASE_URL="non-empty-value" \
+      LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+      COMPILER_VERSION="$COMPILER_VERSION" \
+      CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+      FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+      DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+      WORKER_VERSION="$WORKER_VERSION" \
+      RESULTS_BASE_URL="$RESULTS_BASE_URL" \
       docker compose exec -T -e PGPASSWORD=password! postgres psql -U postgres -d worker-db -c "DELETE FROM ${TABLE}"
 
   done
