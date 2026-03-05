@@ -16,9 +16,6 @@ class ApplicationTest extends TestCase
 {
     private const JOB_LABEL = 'job-label-content';
     private const JOB_MAXIMUM_DURATION_IN_SECONDS = 600;
-
-    private const EVENT_DELIVERY_URL = 'http://callback-receiver:8080/';
-
     private static Client $httpClient;
     private static string $fixturePath;
     private static YamlFileCollectionSerializer $yamlFileCollectionSerializer;
@@ -44,8 +41,8 @@ class ApplicationTest extends TestCase
         $createJobResponse = self::$httpClient->post('https://localhost/job', [
             'form_params' => [
                 'label' => self::JOB_LABEL,
-                'event_delivery_url' => self::EVENT_DELIVERY_URL,
                 'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
+                'results_token' => 'results-token-value',
                 'source' => $this->createJobSource(
                     ['test.yml'],
                     ['test.yml'],
@@ -62,7 +59,6 @@ class ApplicationTest extends TestCase
 
         $this->assertJobStatus([
             'label' => self::JOB_LABEL,
-            'event_delivery_url' => self::EVENT_DELIVERY_URL,
             'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
             'sources' => [
                 'test.yml',
@@ -91,9 +87,9 @@ class ApplicationTest extends TestCase
             $applicationState = $this->getApplicationState();
 
             $isComplete =
-                'complete' === $applicationState['compilation'] &&
-                'complete' === $applicationState['execution'] &&
-                'complete' === $applicationState['event_delivery'];
+                'complete' === $applicationState['compilation']['state'] &&
+                'complete' === $applicationState['execution']['state'] &&
+                'complete' === $applicationState['event_delivery']['state'];
 
             $duration = $duration + $interval;
 
@@ -132,7 +128,6 @@ class ApplicationTest extends TestCase
         $job = $this->getJsonResponseAsArray('/job');
 
         self::assertSame($expected['label'], $job['label']);
-        self::assertSame($expected['event_delivery_url'], $job['event_delivery_url']);
         self::assertSame($expected['maximum_duration_in_seconds'], $job['maximum_duration_in_seconds']);
         self::assertSame($expected['sources'], $job['sources']);
         self::assertSame($job['tests'], $expected['tests']);
@@ -145,30 +140,34 @@ class ApplicationTest extends TestCase
     {
         $applicationState = $this->getApplicationState();
 
+        $compilationState = $applicationState['compilation']['state'];
+        $executionState = $applicationState['execution']['state'];
+        $eventDeliveryState = $applicationState['event_delivery']['state'];
+
         self::assertContains(
-            $applicationState['compilation'],
+            $compilationState,
             $expected['compilation_states'],
             sprintf(
                 'Compilation state "%s" not in expected states "%s"',
-                $applicationState['compilation'],
+                $compilationState,
                 implode(', ', $expected['compilation_states'])
             )
         );
         self::assertContains(
-            $applicationState['execution'],
+            $executionState,
             $expected['execution_states'],
             sprintf(
                 'Execution state "%s" not in expected states "%s"',
-                $applicationState['execution'],
+                $executionState,
                 implode(', ', $expected['execution_states'])
             )
         );
         self::assertContains(
-            $applicationState['event_delivery'],
+            $eventDeliveryState,
             $expected['event_delivery_states'],
             sprintf(
                 'Event delivery state "%s" not in expected states "%s"',
-                $applicationState['event_delivery'],
+                $eventDeliveryState,
                 implode(', ', $expected['event_delivery_states'])
             )
         );
