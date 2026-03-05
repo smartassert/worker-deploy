@@ -49,7 +49,7 @@ class CallbackReceiverLogTest extends TestCase
         echo "=================================================================================================";
         echo json_encode($expectedLogSectionBodies, JSON_PRETTY_PRINT);
         echo "=================================================================================================";
-        echo json_encode(self::$logSections, JSON_PRETTY_PRINT);
+        echo json_encode($logSectionBodyDataCollection, JSON_PRETTY_PRINT);
         echo "=================================================================================================";
 
 //        foreach ($logSectionBodyDataCollection as $key => $value) {
