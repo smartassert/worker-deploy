@@ -46,13 +46,19 @@ class CallbackReceiverLogTest extends TestCase
         ini_set('xdebug.var_display_max_depth', '-1');
         ini_set('xdebug.var_display_max_data', '-1');
 
-        foreach ($logSectionBodyDataCollection as $key => $value) {
-            echo "\n\n\n\n\n";
-            echo $key . "=================================================================================================";
-            echo json_encode($value, JSON_PRETTY_PRINT);
-            echo $key ."=================================================================================================";
-            echo "\n\n\n\n\n";
-        }
+        echo "=================================================================================================";
+        echo json_encode($expectedLogSectionBodies, JSON_PRETTY_PRINT);
+        echo "=================================================================================================";
+        echo json_encode(self::$logSections, JSON_PRETTY_PRINT);
+        echo "=================================================================================================";
+
+//        foreach ($logSectionBodyDataCollection as $key => $value) {
+//            echo "\n\n\n\n\n";
+//            echo $key . "=================================================================================================";
+//            echo json_encode($value, JSON_PRETTY_PRINT);
+//            echo $key ."=================================================================================================";
+//            echo "\n\n\n\n\n";
+//        }
 
 //        self::assertCount(count(self::$logSections), $expectedLogSectionBodies);
 //
