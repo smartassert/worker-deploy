@@ -46,8 +46,16 @@ LAST_EXIT_CODE=$?
 
 ## Teardown
 cd "$INITIAL_DIRECTORY" || exit
-sudo docker compose -f docker-compose.yml -f self-test/services.yml stop http-fixtures
-sudo docker compose -f docker-compose.yml -f self-test/services.yml stop callback-receiver
+
+sudo \
+  LOCAL_SOURCE_PATH="non-empty-value" \
+  COMPILER_VERSION="non-empty-value" \
+  CHROME_RUNNER_VERSION="non-empty-value" \
+  FIREFOX_RUNNER_VERSION="non-empty-value" \
+  DELEGATOR_VERSION="non-empty-value" \
+  WORKER_VERSION="non-empty-value" \
+  RESULTS_BASE_URL="non-empty-value" \
+  docker compose stop http-fixtures callback-receiver
 
 sudo \
   LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
@@ -70,7 +78,17 @@ DB_TABLES=(
 for TABLE in "${DB_TABLES[@]}"
   do
     echo "Removing all from $TABLE"
-    sudo docker compose exec -T -e PGPASSWORD=password! postgres psql -U postgres -d worker-db -c "DELETE FROM ${TABLE}"
+
+    sudo \
+      LOCAL_SOURCE_PATH="non-empty-value" \
+      COMPILER_VERSION="non-empty-value" \
+      CHROME_RUNNER_VERSION="non-empty-value" \
+      FIREFOX_RUNNER_VERSION="non-empty-value" \
+      DELEGATOR_VERSION="non-empty-value" \
+      WORKER_VERSION="non-empty-value" \
+      RESULTS_BASE_URL="non-empty-value" \
+      docker compose exec -T -e PGPASSWORD=password! postgres psql -U postgres -d worker-db -c "DELETE FROM ${TABLE}"
+
   done
 
 sudo apt-get -qq -y remove php8.1-cli php8.1-curl php8.1-dom php8.1-mbstring zip > /dev/null
