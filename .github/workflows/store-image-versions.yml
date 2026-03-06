@@ -57,7 +57,7 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN_SELF }}
 
-      - name: Update
+      - name: Update image-versions.json
         run: |
           JSON="{
             \"compiler\": \"${{ needs.setup.outputs.compiler-version }}\",
@@ -69,11 +69,19 @@ jobs:
 
           echo "$JSON" > ./image-versions.json
 
+      - name: Update image-versions.env
+        run: |
+          echo "COMPILER_VERSION=${{ needs.setup.outputs.compiler-version }}
+          CHROME_RUNNER_VERSION=${{ needs.setup.outputs.chrome-runner-version }}
+          FIREFOX_RUNNER_VERSION=${{ needs.setup.outputs.firefox-runner-version }}
+          DELEGATOR_VERSION=${{ needs.setup.outputs.delegator-version }}
+          WORKER_VERSION=${{ needs.setup.outputs.worker-version }}" > ./image-versions.env
+
       - name: Commit
         id: auto-commit-action
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "Automatic image-versions.json for worker release ${{ needs.setup.outputs.worker-version }}"
+          commit_message: "Automatic image versions for worker release ${{ needs.setup.outputs.worker-version }}"
 
   trigger-create-release:
     name: Trigger create release workflow
