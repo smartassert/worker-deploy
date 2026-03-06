@@ -57,18 +57,6 @@ jobs:
         with:
           token: ${{ secrets.PAT_TOKEN_SELF }}
 
-      - name: Update image-versions.json
-        run: |
-          JSON="{
-            \"compiler\": \"${{ needs.setup.outputs.compiler-version }}\",
-            \"chrome_runner\": \"${{ needs.setup.outputs.chrome-runner-version }}\",
-            \"firefox_runner\": \"${{ needs.setup.outputs.firefox-runner-version }}\",
-            \"delegator\": \"${{ needs.setup.outputs.delegator-version }}\",
-            \"worker\": \"${{ needs.setup.outputs.worker-version }}\"
-          }"
-
-          echo "$JSON" > ./image-versions.json
-
       - name: Update image-versions.env
         run: |
           echo "COMPILER_VERSION=${{ needs.setup.outputs.compiler-version }}
