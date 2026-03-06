@@ -20,11 +20,11 @@ jobs:
       should-release: ${{ github.event.inputs.should-release }}
       release-notes-path: "release-notes.md"
       release-tag: ${{ steps.image-versions.outputs.worker }}
-      compiler-version: ${{ steps.image-versions.outputs.compiler }}
-      chrome-runner-version: ${{ steps.image-versions.outputs.chrome_runner }}
-      firefox-runner-version: ${{ steps.image-versions.outputs.firefox_runner }}
-      delegator-version: ${{ steps.image-versions.outputs.delegator }}
-      worker-version: ${{ steps.image-versions.outputs.worker }}
+      compiler-version: ${{ env.compiler }}
+      chrome-runner-version: ${{ env.chrome_runner }}
+      firefox-runner-version: ${{ env.firefox_runner }}
+      delegator-version: ${{ env.delegator }}
+      worker-version: ${{ env.worker }}
 
     steps:
       - name: Checkout
@@ -41,7 +41,7 @@ jobs:
 
       - name: Read image versions
         id: image-versions
-        run: ./vendor/smartassert/bash-ga-ci-tools/src/create-ga-outputs-from-json-scalar-object.sh < ./image-versions.json
+        run: ./vendor/smartassert/bash-ga-ci-tools/src/output-json-scalar-object.sh "{{ key }}={{ value }}\n" < ./image-versions.json >> "$GITHUB_ENV"
 
   verify-setup:
     name: Verify setup
