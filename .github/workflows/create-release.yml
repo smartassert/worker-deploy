@@ -19,7 +19,6 @@ jobs:
       commit-hash: ${{ github.event.inputs.commit-hash }}
       should-release: ${{ github.event.inputs.should-release }}
       release-notes-path: "release-notes.md"
-      release-tag: ${{ steps.image-versions.outputs.worker }}
       compiler-version: ${{ env.COMPILER_VERSION }}
       chrome-runner-version: ${{ env.CHROME_RUNNER_VERSION }}
       firefox-runner-version: ${{ env.FIREFOX_RUNNER_VERSION }}
@@ -83,8 +82,8 @@ jobs:
         if: ${{ needs.setup.outputs.should-release == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PAT_TOKEN_SELF }}
-          TAG: ${{ needs.setup.outputs.release-tag }}
+          TAG: ${{ needs.setup.outputs.worker-version }}
           TARGET: ${{ needs.setup.outputs.commit-hash }}
-          TITLE: "Automatic release ${{ needs.setup.outputs.release-tag }}"
+          TITLE: "Automatic release ${{ needs.setup.outputs.worker-version }}"
           NOTES_FILE: ${{ needs.setup.outputs.release-notes-path }}
         run: gh release create "$TAG" --target "$TARGET" --title "$TITLE" --notes-file "$NOTES_FILE"
