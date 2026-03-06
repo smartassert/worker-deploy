@@ -28,11 +28,11 @@ jobs:
       should-deploy: ${{ env.SHOULD_DEPLOY }}
       version: ${{ env.VERSION }}
       snapshot-name: ${{ env.SNAPSHOT_NAME }}
-      compiler-version: ${{ env.compiler }}
-      chrome-runner-version: ${{ env.chrome_runner }}
-      firefox-runner-version: ${{ env.firefox_runner }}
-      delegator-version: ${{ env.delegator }}
-      worker-version: ${{ env.worker }}
+      compiler-version: ${{ env.COMPILER_VERSION }}
+      chrome-runner-version: ${{ env.CHROME_RUNNER_VERSION }}
+      firefox-runner-version: ${{ env.FIREFOX_RUNNER_VERSION }}
+      delegator-version: ${{ env.DELEGATOR_VERSION }}
+      worker-version: ${{ env.WORKER_VERSION }}
 
     steps:
       - name: Checkout
@@ -69,7 +69,7 @@ jobs:
         env:
           REPO: ${{ github.repository }}
           VERSION: ${{ env.VERSION }}
-          FILE_PATH: ./image-versions.json
+          FILE_PATH: ./image-versions.env
         run: ./vendor/smartassert/bash-ga-ci-tools/src/get-gh-file.sh
 
       - name: Deploy after building image?
@@ -89,7 +89,9 @@ jobs:
           echo "SNAPSHOT_NAME=$SNAPSHOT_NAME" >> "$GITHUB_ENV"
 
       - name: Read image versions
-        run: ./vendor/smartassert/bash-ga-ci-tools/src/output-json-scalar-object.sh "{{ key }}={{ value }}\n" < ./image-versions.json >> "$GITHUB_ENV"
+        env:
+          ENV_FILE_PATH: ./image-versions.env
+        run: sed '/^$/d' "$ENV_FILE_PATH" >> "$GITHUB_ENV"
 
   verify-setup:
     name: Verify setup
