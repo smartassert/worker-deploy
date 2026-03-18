@@ -1,4 +1,4 @@
-https://* {
+https:// {
 	root * /app/public
 	php_fastcgi * app:9000
 
