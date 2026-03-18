@@ -1,23 +1,8 @@
-{
-	on_demand_tls {
-		ask http://localhost:8080/
-	}
-}
-
-http://localhost:8080 {
-	@query_domain_matcher {
-		query domain={$DOMAIN}
-	}
-
-	respond @query_domain_matcher 200 {
-	}
-}
-
-https://{$DOMAIN} {
+https://* {
 	root * /app/public
 	php_fastcgi * app:9000
 
-	tls {$TLS_INTERNAL} {
+	tls internal {
 		on_demand
 	}
 
