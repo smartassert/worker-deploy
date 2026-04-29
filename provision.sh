@@ -55,7 +55,6 @@ sudo \
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
   docker compose up -d
 
 sleep 10
@@ -67,7 +66,6 @@ sudo \
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
   docker compose exec -T app php bin/console doctrine:database:create --if-not-exists
 
 sudo \
@@ -77,5 +75,4 @@ sudo \
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
   docker compose exec -T app php bin/console doctrine:schema:update --force

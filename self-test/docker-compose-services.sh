@@ -18,7 +18,6 @@ servicesList=$(
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  RESULTS_BASE_URL="$RESULTS_BASE_URL" \
   docker compose ps --services --filter "status=running"
 )
 
