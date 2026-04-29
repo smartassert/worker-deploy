@@ -127,7 +127,6 @@ jobs:
       FIREFOX_RUNNER_VERSION: ${{ needs.setup.outputs.firefox-runner-version }}
       DELEGATOR_VERSION: ${{ needs.setup.outputs.delegator-version }}
       WORKER_VERSION: ${{ needs.setup.outputs.worker-version }}
-      RESULTS_BASE_URL: ${{ secrets.RESULTS_BASE_URL }}
     outputs:
       image-id: ${{ env.IMAGE_ID }}
 

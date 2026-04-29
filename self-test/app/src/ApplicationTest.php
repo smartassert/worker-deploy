@@ -42,7 +42,7 @@ class ApplicationTest extends TestCase
             'form_params' => [
                 'label' => self::JOB_LABEL,
                 'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
-                'results_token' => 'results-token-value',
+                'event_add_url' => 'http://callback-receiver:8080',
                 'source' => $this->createJobSource(
                     ['test.yml'],
                     ['test.yml'],
