@@ -7,7 +7,16 @@ sudo \
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  docker compose exec -T app php bin/console doctrine:database:create --if-not-exists
+  docker compose exec -T app php bin/console doctrine:database:drop --no-interaction --if-exists
+
+sudo \
+  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
+  COMPILER_VERSION="$COMPILER_VERSION" \
+  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
+  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
+  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
+  WORKER_VERSION="$WORKER_VERSION" \
+  docker compose exec -T app php bin/console doctrine:database:create
 
 sudo \
   LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
