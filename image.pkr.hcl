@@ -113,6 +113,14 @@ build {
   }
 
   provisioner "shell" {
+    scripts = ["./provision/install_docker_packages.sh"]
+  }
+
+  provisioner "shell" {
+    scripts = ["./provision/make_application_data_directories.sh"]
+  }
+
+  provisioner "shell" {
     environment_vars = [
       "LOCAL_SOURCE_PATH=/var/basil/source",
       "COMPILER_VERSION=${var.compiler_version}",
@@ -121,7 +129,19 @@ build {
       "DELEGATOR_VERSION=${var.delegator_version}",
       "WORKER_VERSION=${var.worker_version}"
     ]
-    scripts = ["./provision.sh"]
+    scripts = ["./provision/start_docker_services.sh"]
+  }
+
+  provisioner "shell" {
+    environment_vars = [
+      "LOCAL_SOURCE_PATH=/var/basil/source",
+      "COMPILER_VERSION=${var.compiler_version}",
+      "CHROME_RUNNER_VERSION=${var.chrome_runner_version}",
+      "FIREFOX_RUNNER_VERSION=${var.firefox_runner_version}",
+      "DELEGATOR_VERSION=${var.delegator_version}",
+      "WORKER_VERSION=${var.worker_version}"
+    ]
+    scripts = ["./provision/create_database.sh"]
   }
 
   # Copy docker services self-test files and run docker services self-test process

@@ -40,39 +40,3 @@ run_command_until_successful sudo apt-get install -y \
 
 run_command_until_successful sudo apt-get autoremove -y
 rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-mkdir -p /var/basil/source
-chown -R www-data:www-data /var/basil/source
-mkdir -p /var/basil/tests
-chown -R www-data:www-data /var/basil/tests
-mkdir -p /var/log
-chown -R www-data:www-data /var/log
-
-sudo \
-  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
-  COMPILER_VERSION="$COMPILER_VERSION" \
-  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
-  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
-  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
-  WORKER_VERSION="$WORKER_VERSION" \
-  docker compose up -d
-
-sleep 10
-
-sudo \
-  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
-  COMPILER_VERSION="$COMPILER_VERSION" \
-  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
-  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
-  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
-  WORKER_VERSION="$WORKER_VERSION" \
-  docker compose exec -T app php bin/console doctrine:database:create --if-not-exists
-
-sudo \
-  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
-  COMPILER_VERSION="$COMPILER_VERSION" \
-  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
-  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
-  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
-  WORKER_VERSION="$WORKER_VERSION" \
-  docker compose exec -T app php bin/console doctrine:schema:update --force
