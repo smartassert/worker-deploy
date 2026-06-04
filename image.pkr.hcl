@@ -121,7 +121,7 @@ build {
       "DELEGATOR_VERSION=${var.delegator_version}",
       "WORKER_VERSION=${var.worker_version}"
     ]
-    scripts = ["./provision.sh"]
+    scripts = ["./provision/provision.sh"]
   }
 
   # Copy docker services self-test files and run docker services self-test process
