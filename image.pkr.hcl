@@ -113,6 +113,10 @@ build {
   }
 
   provisioner "shell" {
+    scripts = ["./provision/install_docker_packages.sh"]
+  }
+
+  provisioner "shell" {
     environment_vars = [
       "LOCAL_SOURCE_PATH=/var/basil/source",
       "COMPILER_VERSION=${var.compiler_version}",
