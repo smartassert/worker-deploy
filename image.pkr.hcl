@@ -221,7 +221,7 @@ build {
       "DELEGATOR_VERSION=${var.delegator_version}",
       "WORKER_VERSION=${var.worker_version}"
     ]
-    scripts = ["./provision/drop_and_create_database.sh"]
+    scripts = ["./provision/start_docker_services.sh"]
   }
 
   provisioner "shell" {
@@ -233,6 +233,6 @@ build {
       "DELEGATOR_VERSION=${var.delegator_version}",
       "WORKER_VERSION=${var.worker_version}"
     ]
-    scripts = ["./provision/start_docker_services.sh"]
+    scripts = ["./provision/drop_and_create_database.sh"]
   }
 }
