@@ -7,7 +7,7 @@ sudo \
   FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
   DELEGATOR_VERSION="$DELEGATOR_VERSION" \
   WORKER_VERSION="$WORKER_VERSION" \
-  docker compose exec -T app php bin/console doctrine:database:drop --no-interaction --if-exists
+  docker compose exec -T app php bin/console doctrine:database:drop --no-interaction --if-exists --force
 
 sudo \
   LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
