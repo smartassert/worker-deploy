@@ -117,6 +117,10 @@ build {
   }
 
   provisioner "shell" {
+    scripts = ["./provision/make_application_data_directories.sh"]
+  }
+
+  provisioner "shell" {
     environment_vars = [
       "LOCAL_SOURCE_PATH=/var/basil/source",
       "COMPILER_VERSION=${var.compiler_version}",
