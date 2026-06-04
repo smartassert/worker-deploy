@@ -54,15 +54,6 @@ sudo \
   WORKER_VERSION="$WORKER_VERSION" \
   docker compose stop http-fixtures callback-receiver
 
-sudo \
-  LOCAL_SOURCE_PATH="$LOCAL_SOURCE_PATH" \
-  COMPILER_VERSION="$COMPILER_VERSION" \
-  CHROME_RUNNER_VERSION="$CHROME_RUNNER_VERSION" \
-  FIREFOX_RUNNER_VERSION="$FIREFOX_RUNNER_VERSION" \
-  DELEGATOR_VERSION="$DELEGATOR_VERSION" \
-  WORKER_VERSION="$WORKER_VERSION" \
-  docker compose up -d --remove-orphans
-
 sudo apt-get -qq -y remove php8.1-cli php8.1-curl php8.1-dom php8.1-mbstring zip > /dev/null
 sudo apt-get -qq -y autoremove > /dev/null
 sudo rm -Rf ./self-test
