@@ -71,7 +71,7 @@ class CallbackReceiverLogTest extends TestCase
                     ],
                     [
                         'sequence_number' => 2,
-                        'type' => 'job/compilation/started',
+                        'type' => 'job-compilation/started',
                         'body' => [],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
@@ -102,14 +102,14 @@ class CallbackReceiverLogTest extends TestCase
                     ],
                     [
                         'sequence_number' => 5,
-                        'type' => 'job/compilation/ended',
+                        'type' => 'job-compilation/completed',
                         'body' => [],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
                     ],
                     [
                         'sequence_number' => 6,
-                        'type' => 'job/execution/started',
+                        'type' => 'job-execution/started',
                         'body' => [],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
@@ -196,7 +196,7 @@ class CallbackReceiverLogTest extends TestCase
                     ],
                     [
                         'sequence_number' => 10,
-                        'type' => 'job/execution/completed',
+                        'type' => 'job-execution/completed',
                         'body' => [],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
