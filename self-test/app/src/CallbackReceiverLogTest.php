@@ -71,14 +71,14 @@ class CallbackReceiverLogTest extends TestCase
                     ],
                     [
                         'sequence_number' => 2,
-                        'type' => 'job-compilation/started',
+                        'type' => 'lifecycle/compilation-started',
                         'body' => [],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
                     ],
                     [
                         'sequence_number' => 3,
-                        'type' => 'source-compilation/started',
+                        'type' => 'compilation/started',
                         'body' => [
                             'source' => 'test.yml',
                         ],
@@ -87,7 +87,7 @@ class CallbackReceiverLogTest extends TestCase
                     ],
                     [
                         'sequence_number' => 4,
-                        'type' => 'source-compilation/passed',
+                        'type' => 'compilation/passed',
                         'body' => [
                             'source' => 'test.yml',
                         ],
@@ -102,14 +102,14 @@ class CallbackReceiverLogTest extends TestCase
                     ],
                     [
                         'sequence_number' => 5,
-                        'type' => 'job-compilation/completed',
+                        'type' => 'lifecycle/compilation-completed',
                         'body' => [],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
                     ],
                     [
                         'sequence_number' => 6,
-                        'type' => 'job-execution/started',
+                        'type' => 'lifecycle/execution-started',
                         'body' => [],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
@@ -196,7 +196,7 @@ class CallbackReceiverLogTest extends TestCase
                     ],
                     [
                         'sequence_number' => 10,
-                        'type' => 'job-execution/completed',
+                        'type' => 'lifecycle/execution-completed',
                         'body' => [],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
