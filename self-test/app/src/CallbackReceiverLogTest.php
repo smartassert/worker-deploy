@@ -55,6 +55,7 @@ class CallbackReceiverLogTest extends TestCase
             'default' => [
                 'expectedLogSectionBodies' => [
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 1,
                         'type' => 'job/started',
                         'body' => [
@@ -70,6 +71,7 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 2,
                         'type' => 'lifecycle/compilation-started',
                         'body' => [],
@@ -77,6 +79,7 @@ class CallbackReceiverLogTest extends TestCase
                         'reference' => md5(self::JOB_LABEL),
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 3,
                         'type' => 'compilation/started',
                         'body' => [
@@ -86,6 +89,7 @@ class CallbackReceiverLogTest extends TestCase
                         'reference' => md5(self::JOB_LABEL . 'test.yml'),
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 4,
                         'type' => 'compilation/passed',
                         'body' => [
@@ -101,6 +105,7 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 5,
                         'type' => 'lifecycle/compilation-completed',
                         'body' => [],
@@ -108,6 +113,7 @@ class CallbackReceiverLogTest extends TestCase
                         'reference' => md5(self::JOB_LABEL),
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 6,
                         'type' => 'lifecycle/execution-started',
                         'body' => [],
@@ -115,6 +121,7 @@ class CallbackReceiverLogTest extends TestCase
                         'reference' => md5(self::JOB_LABEL),
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 7,
                         'type' => 'test/started',
                         'body' => [
@@ -143,6 +150,7 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 8,
                         'type' => 'step/passed',
                         'body' => [
@@ -167,6 +175,7 @@ class CallbackReceiverLogTest extends TestCase
                         'reference'=> md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 9,
                         'type' => 'test/passed',
                         'body' => [
@@ -195,6 +204,7 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 10,
                         'type' => 'lifecycle/execution-completed',
                         'body' => [],
@@ -202,6 +212,7 @@ class CallbackReceiverLogTest extends TestCase
                         'reference' => md5(self::JOB_LABEL),
                     ],
                     [
+                        'job' => self::JOB_LABEL,
                         'sequence_number' => 11,
                         'type' => 'job/ended',
                         'body' => [
