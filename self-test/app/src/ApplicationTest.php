@@ -44,6 +44,8 @@ class ApplicationTest extends TestCase
                 'maximum_duration_in_seconds' => self::JOB_MAXIMUM_DURATION_IN_SECONDS,
                 'event_notify_url' => 'http://callback-receiver:8080',
                 'event_notify_token' => 'event-notify-token',
+                'state_notify_url' => 'http://callback-receiver:8080',
+                'state_notify_token' => 'state-notify-token',
                 'source' => $this->createJobSource(
                     ['test.yml'],
                     ['test.yml'],
