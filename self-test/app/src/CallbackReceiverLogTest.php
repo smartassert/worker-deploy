@@ -14,7 +14,11 @@ class CallbackReceiverLogTest extends TestCase
      * @var array<array<mixed>>
      */
     private static array $logSections = [];
-    private static array $loggedNotifications = [];
+
+    /**
+     * @var array<array<mixed>>
+     */
+    private static array $notifications = [];
 
     public static function setUpBeforeClass(): void
     {
@@ -22,37 +26,58 @@ class CallbackReceiverLogTest extends TestCase
 
         self::$logSections = self::extractLogSections((string) stream_get_contents(STDIN));
 
-        $loggedNotifications = [];
+        $notifications = [];
         foreach (self::$logSections as $logSection) {
-            $loggedNotifications[] = self::decodeLoggedNotification($logSection);
+            $notifications[] = self::decodeLoggedNotification($logSection);
         }
 
-        self::$loggedNotifications = $loggedNotifications;
-    }
-
-    public function testLogSize(): void
-    {
-        self::assertCount(11, self::$logSections, self::renderLogAssertionFailureMessage());
+        self::$notifications = $notifications;
     }
 
     /**
-     * @dataProvider loggedNotificationDataProvider
+     * @dataProvider stateChangeNotificationsDataProvider
      *
-     * @param array<mixed> $expectedLoggedNotifications
+     * @param array<array<mixed>> $expected
      */
-    public function testLoggedNotifications(array $expectedLoggedNotifications): void
+    public function testStateChangeNotifications(array $expected): void
     {
+        $notifications = self::getStateChangeNotifications();
+
         self::assertCount(
-            count(self::$logSections),
-            $expectedLoggedNotifications,
-            self::renderLogAssertionFailureMessage(),
+            count($expected),
+            $notifications,
+            self::renderLogAssertionFailureMessage($notifications),
         );
 
-        foreach ($expectedLoggedNotifications as $expectedLoggedNotification) {
+        foreach ($expected as $expectedLoggedNotification) {
             self::assertContains(
                 $expectedLoggedNotification,
-                self::$loggedNotifications,
-                self::renderLogAssertionFailureMessage(),
+                $notifications,
+                self::renderLogAssertionFailureMessage($notifications),
+            );
+        }
+    }
+
+    /**
+     * @dataProvider eventNotificationsDataProvider
+     *
+     * @param array<array<mixed>> $expected
+     */
+    public function testEventNotifications(array $expected): void
+    {
+        $notifications = self::getEventNotifications();
+
+        self::assertCount(
+            count($expected),
+            $notifications,
+            self::renderLogAssertionFailureMessage($notifications),
+        );
+
+        foreach ($expected as $expectedLoggedNotification) {
+            self::assertContains(
+                $expectedLoggedNotification,
+                $notifications,
+                self::renderLogAssertionFailureMessage($notifications),
             );
         }
     }
@@ -60,11 +85,196 @@ class CallbackReceiverLogTest extends TestCase
     /**
      * @return array<mixed>
      */
-    public function loggedNotificationDataProvider(): array
+    public function stateChangeNotificationsDataProvider(): array
+    {
+        $applicationAwaitingState = [
+            'state' => 'awaiting',
+            'meta_state' => [
+                'pending' => true,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+            ],
+        ];
+
+        $applicationCompilingState = [
+            'state' => 'compiling',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'compiling',
+            ],
+        ];
+
+        $applicationExecutingState = [
+            'state' => 'executing',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'compiling',
+                'executing',
+            ],
+        ];
+
+        $applicationCompletingEventDeliveryState = [
+            'state' => 'completing-event-delivery',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'compiling',
+                'executing',
+                'completing-event-delivery',
+            ],
+        ];
+
+        $applicationCompleteState = [
+            'state' => 'complete',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => true,
+                'succeeded' => true,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'compiling',
+                'executing',
+                'completing-event-delivery',
+                'complete',
+            ],
+        ];
+
+        $componentAwaitingState = $applicationAwaitingState;
+
+        $componentRunningState = [
+            'state' => 'running',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'running',
+            ],
+        ];
+
+        $componentCompleteState = [
+            'state' => 'complete',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => true,
+                'succeeded' => true,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'running',
+                'complete',
+            ],
+        ];
+
+        $awaitingRunningAwaitingAwaitingState = [
+            'application' => $applicationAwaitingState,
+            'compilation' => $componentRunningState,
+            'execution' => $componentAwaitingState,
+            'event_delivery' => $componentAwaitingState,
+        ];
+
+        $compilingRunningAwaitingAwaitingState = [
+            'application' => $applicationCompilingState,
+            'compilation' => $componentRunningState,
+            'execution' => $componentAwaitingState,
+            'event_delivery' => $componentAwaitingState,
+        ];
+
+        $compilingRunningAwaitingRunningState = [
+            'application' => $applicationCompilingState,
+            'compilation' => $componentRunningState,
+            'execution' => $componentAwaitingState,
+            'event_delivery' => $componentRunningState,
+        ];
+
+        $executingCompleteAwaitingRunningState = [
+            'application' => $applicationExecutingState,
+            'compilation' => $componentCompleteState,
+            'execution' => $componentAwaitingState,
+            'event_delivery' => $componentRunningState,
+        ];
+
+        $executingCompleteRunningRunningState = [
+            'application' => $applicationExecutingState,
+            'compilation' => $componentCompleteState,
+            'execution' => $componentRunningState,
+            'event_delivery' => $componentRunningState,
+        ];
+
+        $completingEventDeliveryCompleteCompleteRunningState = [
+            'application' => $applicationCompletingEventDeliveryState,
+            'compilation' => $componentCompleteState,
+            'execution' => $componentCompleteState,
+            'event_delivery' => $componentRunningState,
+        ];
+
+        $completeCompleteCompleteCompleteState = [
+            'application' => $applicationCompleteState,
+            'compilation' => $componentCompleteState,
+            'execution' => $componentCompleteState,
+            'event_delivery' => $componentCompleteState,
+        ];
+
+        return [
+            'default' => [
+                'expected' => [
+                    [
+                        'previous_state' => $awaitingRunningAwaitingAwaitingState,
+                        'new_state' => $compilingRunningAwaitingAwaitingState,
+                    ],
+                    [
+                        'previous_state' => $compilingRunningAwaitingAwaitingState,
+                        'new_state' => $compilingRunningAwaitingRunningState,
+                    ],
+                    [
+                        'previous_state' => $compilingRunningAwaitingRunningState,
+                        'new_state' => $executingCompleteAwaitingRunningState,
+                    ],
+                    [
+                        'previous_state' => $executingCompleteAwaitingRunningState,
+                        'new_state' => $executingCompleteRunningRunningState,
+                    ],
+                    [
+                        'previous_state' => $executingCompleteRunningRunningState,
+                        'new_state' => $completingEventDeliveryCompleteCompleteRunningState,
+                    ],
+                    [
+                        'previous_state' => $completingEventDeliveryCompleteCompleteRunningState,
+                        'new_state' => $completeCompleteCompleteCompleteState,
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function eventNotificationsDataProvider(): array
     {
         return [
             'default' => [
-                'expectedLoggedNotifications' => [
+                'expected' => [
                     [
                         'job' => self::JOB_LABEL,
                         'sequence_number' => 1,
@@ -287,14 +497,46 @@ class CallbackReceiverLogTest extends TestCase
         return implode("\n", $lines);
     }
 
-    private static function renderLogAssertionFailureMessage(): string
+    private static function renderLogAssertionFailureMessage(array $notifications): string
     {
         return (string) json_encode(
             [
-                'notification_count' => count(self::$logSections),
-                'notification_bodies' => self::$loggedNotifications,
+                'notification_count' => count($notifications),
+                'notification_bodies' => $notifications,
             ],
             JSON_PRETTY_PRINT,
         );
+    }
+
+    /**
+     * @return array<array<mixed>>
+     */
+    private static function getStateChangeNotifications(): array
+    {
+        return self::filterNotificationsByExistentKey('previous_state');
+    }
+
+    /**
+     * @return array<array<mixed>>
+     */
+    private static function getEventNotifications(): array
+    {
+        return self::filterNotificationsByExistentKey('job');
+    }
+
+    /**
+     * @return array<array<mixed>>
+     */
+    private static function filterNotificationsByExistentKey(string $key): array
+    {
+        $notifications = [];
+
+        foreach (self::$notifications as $loggedNotification) {
+            if (array_key_exists($key, $loggedNotification)) {
+                $notifications[] = $loggedNotification;
+            }
+        }
+
+        return $notifications;
     }
 }
