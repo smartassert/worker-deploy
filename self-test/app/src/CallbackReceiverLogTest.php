@@ -62,9 +62,165 @@ class CallbackReceiverLogTest extends TestCase
      */
     public function loggedNotificationDataProvider(): array
     {
+        $applicationAwaitingState = [
+            'state' => 'awaiting',
+            'meta_state' => [
+                'pending' => true,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+            ],
+        ];
+
+        $applicationCompilingState = [
+            'state' => 'compiling',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'compiling',
+            ],
+        ];
+
+        $applicationExecutingState = [
+            'state' => 'executing',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'compiling',
+                'executing',
+            ],
+        ];
+
+        $applicationCompletingEventDeliveryState = [
+            'state' => 'completing-event-delivery',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'compiling',
+                'executing',
+                'completing-event-delivery',
+            ],
+        ];
+
+        $applicationCompleteState = [
+            'state' => 'complete',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => true,
+                'succeeded' => true,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'compiling',
+                'executing',
+                'completing-event-delivery',
+                'complete',
+            ],
+        ];
+
+        $componentAwaitingState = $applicationAwaitingState;
+
+        $componentRunningState = [
+            'state' => 'running',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => false,
+                'succeeded' => false,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'running',
+            ],
+        ];
+
+        $componentCompleteState = [
+            'state' => 'complete',
+            'meta_state' => [
+                'pending' => false,
+                'ended' => true,
+                'succeeded' => true,
+            ],
+            'previous_states' => [
+                'awaiting',
+                'running',
+                'complete',
+            ],
+        ];
+
+        $awaitingRunningAwaitingAwaitingState = [
+            'application' => $applicationAwaitingState,
+            'compilation' => $componentRunningState,
+            'execution' => $componentAwaitingState,
+            'event_delivery' => $componentAwaitingState,
+        ];
+
+        $compilingRunningAwaitingAwaitingState = [
+            'application' => $applicationCompilingState,
+            'compilation' => $componentRunningState,
+            'execution' => $componentAwaitingState,
+            'event_delivery' => $componentAwaitingState,
+        ];
+
+        $compilingRunningAwaitingRunningState = [
+            'application' => $applicationCompilingState,
+            'compilation' => $componentRunningState,
+            'execution' => $componentAwaitingState,
+            'event_delivery' => $componentRunningState,
+        ];
+
+        $executingCompleteAwaitingRunningState = [
+            'application' => $applicationExecutingState,
+            'compilation' => $componentCompleteState,
+            'execution' => $componentAwaitingState,
+            'event_delivery' => $componentRunningState,
+        ];
+
+        $executingCompleteRunningRunningState = [
+            'application' => $applicationExecutingState,
+            'compilation' => $componentCompleteState,
+            'execution' => $componentRunningState,
+            'event_delivery' => $componentRunningState,
+        ];
+
+        $completingEventDeliveryCompleteCompleteRunningState = [
+            'application' => $applicationCompletingEventDeliveryState,
+            'compilation' => $componentCompleteState,
+            'execution' => $componentCompleteState,
+            'event_delivery' => $componentRunningState,
+        ];
+
+        $completeCompleteCompleteCompleteState = [
+            'application' => $applicationCompleteState,
+            'compilation' => $componentCompleteState,
+            'execution' => $componentCompleteState,
+            'event_delivery' => $componentCompleteState,
+        ];
+
         return [
             'default' => [
                 'expectedLoggedNotifications' => [
+                    [
+                        'previous_state' => $awaitingRunningAwaitingAwaitingState,
+                        'new_state' => $compilingRunningAwaitingAwaitingState,
+                    ],
+                    [
+                        'previous_state' => $compilingRunningAwaitingAwaitingState,
+                        'new_state' => $compilingRunningAwaitingRunningState,
+                    ],
                     [
                         'job' => self::JOB_LABEL,
                         'sequence_number' => 1,
@@ -116,6 +272,10 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                     ],
                     [
+                        'previous_state' => $compilingRunningAwaitingRunningState,
+                        'new_state' => $executingCompleteAwaitingRunningState,
+                    ],
+                    [
                         'job' => self::JOB_LABEL,
                         'sequence_number' => 5,
                         'type' => 'lifecycle/compilation-completed',
@@ -161,6 +321,10 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                     ],
                     [
+                        'previous_state' => $executingCompleteAwaitingRunningState,
+                        'new_state' => $executingCompleteRunningRunningState,
+                    ],
+                    [
                         'job' => self::JOB_LABEL,
                         'sequence_number' => 8,
                         'type' => 'step/passed',
@@ -184,6 +348,10 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                         'label' => 'verify page is open',
                         'reference'=> md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
+                    ],
+                    [
+                        'previous_state' => $executingCompleteRunningRunningState,
+                        'new_state' => $completingEventDeliveryCompleteCompleteRunningState,
                     ],
                     [
                         'job' => self::JOB_LABEL,
@@ -233,6 +401,10 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
+                    ],
+                    [
+                        'previous_state' => $completingEventDeliveryCompleteCompleteRunningState,
+                        'new_state' => $completeCompleteCompleteCompleteState,
                     ],
                 ],
             ],
