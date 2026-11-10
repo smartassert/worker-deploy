@@ -48,6 +48,7 @@ class CallbackReceiverLogTest extends TestCase
     public function testNotifications(array $notifications, array $expected): void
     {
         var_dump(self::getStateChangeNotifications());
+        var_dump($notifications);
 
         self::assertCount(
             count($expected),
