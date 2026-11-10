@@ -32,7 +32,7 @@ class CallbackReceiverLogTest extends TestCase
 
     public function testLogSize(): void
     {
-        self::assertCount(11, self::$logSections, self::renderLogAssertionFailureMessage());
+        self::assertCount(17, self::$logSections, self::renderLogAssertionFailureMessage());
     }
 
     /**
