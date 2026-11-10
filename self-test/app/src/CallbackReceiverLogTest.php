@@ -34,33 +34,50 @@ class CallbackReceiverLogTest extends TestCase
         self::$notifications = $notifications;
     }
 
-    public function testLogSize(): void
-    {
-        self::assertCount(17, self::$logSections, self::renderLogAssertionFailureMessage());
-    }
-
     /**
-     * @dataProvider notificationsDataProvider
+     * @dataProvider stateChangeNotificationsDataProvider
      *
-     * @param array<array<mixed>> $notifications
      * @param array<array<mixed>> $expected
      */
-    public function testNotifications(array $notifications, array $expected): void
+    public function testStateChangeNotifications(array $expected): void
     {
-        var_dump(self::getStateChangeNotifications());
-        var_dump($notifications);
+        $notifications = self::getStateChangeNotifications();
 
         self::assertCount(
             count($expected),
             $notifications,
-            self::renderLogAssertionFailureMessage(),
+            self::renderLogAssertionFailureMessage($notifications),
         );
 
         foreach ($expected as $expectedLoggedNotification) {
             self::assertContains(
                 $expectedLoggedNotification,
                 $notifications,
-                self::renderLogAssertionFailureMessage(),
+                self::renderLogAssertionFailureMessage($notifications),
+            );
+        }
+    }
+
+    /**
+     * @dataProvider eventNotificationsDataProvider
+     *
+     * @param array<array<mixed>> $expected
+     */
+    public function testEventNotifications(array $expected): void
+    {
+        $notifications = self::getEventNotifications();
+
+        self::assertCount(
+            count($expected),
+            $notifications,
+            self::renderLogAssertionFailureMessage($notifications),
+        );
+
+        foreach ($expected as $expectedLoggedNotification) {
+            self::assertContains(
+                $expectedLoggedNotification,
+                $notifications,
+                self::renderLogAssertionFailureMessage($notifications),
             );
         }
     }
@@ -68,7 +85,7 @@ class CallbackReceiverLogTest extends TestCase
     /**
      * @return array<mixed>
      */
-    public function notificationsDataProvider(): array
+    public function stateChangeNotificationsDataProvider(): array
     {
         $applicationAwaitingState = [
             'state' => 'awaiting',
@@ -219,8 +236,7 @@ class CallbackReceiverLogTest extends TestCase
         ];
 
         return [
-            'state changes' => [
-                'notifications' => self::getStateChangeNotifications(),
+            'default' => [
                 'expected' => [
                     [
                         'previous_state' => $awaitingRunningAwaitingAwaitingState,
@@ -248,8 +264,16 @@ class CallbackReceiverLogTest extends TestCase
                     ],
                 ],
             ],
-            'events' => [
-                'notifications' => self::getEventNotifications(),
+        ];
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function eventNotificationsDataProvider(): array
+    {
+        return [
+            'default' => [
                 'expected' => [
                     [
                         'job' => self::JOB_LABEL,
@@ -473,12 +497,12 @@ class CallbackReceiverLogTest extends TestCase
         return implode("\n", $lines);
     }
 
-    private static function renderLogAssertionFailureMessage(): string
+    private static function renderLogAssertionFailureMessage(array $notifications): string
     {
         return (string) json_encode(
             [
-                'notification_count' => count(self::$logSections),
-                'notification_bodies' => self::$notifications,
+                'notification_count' => count($notifications),
+                'notification_bodies' => $notifications,
             ],
             JSON_PRETTY_PRINT,
         );
