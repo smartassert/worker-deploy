@@ -14,7 +14,11 @@ class CallbackReceiverLogTest extends TestCase
      * @var array<array<mixed>>
      */
     private static array $logSections = [];
-    private static array $loggedNotifications = [];
+
+    /**
+     * @var array<array<mixed>>
+     */
+    private static array $notifications = [];
 
     public static function setUpBeforeClass(): void
     {
@@ -22,12 +26,12 @@ class CallbackReceiverLogTest extends TestCase
 
         self::$logSections = self::extractLogSections((string) stream_get_contents(STDIN));
 
-        $loggedNotifications = [];
+        $notifications = [];
         foreach (self::$logSections as $logSection) {
-            $loggedNotifications[] = self::decodeLoggedNotification($logSection);
+            $notifications[] = self::decodeLoggedNotification($logSection);
         }
 
-        self::$loggedNotifications = $loggedNotifications;
+        self::$notifications = $notifications;
     }
 
     public function testLogSize(): void
@@ -36,22 +40,23 @@ class CallbackReceiverLogTest extends TestCase
     }
 
     /**
-     * @dataProvider loggedNotificationDataProvider
+     * @dataProvider notificationsDataProvider
      *
-     * @param array<mixed> $expectedLoggedNotifications
+     * @param array<array<mixed>> $notifications
+     * @param array<array<mixed>> $expected
      */
-    public function testLoggedNotifications(array $expectedLoggedNotifications): void
+    public function testNotifications(array $notifications, array $expected): void
     {
         self::assertCount(
-            count(self::$logSections),
-            $expectedLoggedNotifications,
+            count($expected),
+            $notifications,
             self::renderLogAssertionFailureMessage(),
         );
 
-        foreach ($expectedLoggedNotifications as $expectedLoggedNotification) {
+        foreach ($expected as $expectedLoggedNotification) {
             self::assertContains(
                 $expectedLoggedNotification,
-                self::$loggedNotifications,
+                $notifications,
                 self::renderLogAssertionFailureMessage(),
             );
         }
@@ -60,7 +65,7 @@ class CallbackReceiverLogTest extends TestCase
     /**
      * @return array<mixed>
      */
-    public function loggedNotificationDataProvider(): array
+    public function notificationsDataProvider(): array
     {
         $applicationAwaitingState = [
             'state' => 'awaiting',
@@ -211,8 +216,9 @@ class CallbackReceiverLogTest extends TestCase
         ];
 
         return [
-            'default' => [
-                'expectedLoggedNotifications' => [
+            'state changes' => [
+                'notifications' => self::getStateChangeNotifications(),
+                'expected' => [
                     [
                         'previous_state' => $awaitingRunningAwaitingAwaitingState,
                         'new_state' => $compilingRunningAwaitingAwaitingState,
@@ -221,6 +227,27 @@ class CallbackReceiverLogTest extends TestCase
                         'previous_state' => $compilingRunningAwaitingAwaitingState,
                         'new_state' => $compilingRunningAwaitingRunningState,
                     ],
+                    [
+                        'previous_state' => $compilingRunningAwaitingRunningState,
+                        'new_state' => $executingCompleteAwaitingRunningState,
+                    ],
+                    [
+                        'previous_state' => $executingCompleteAwaitingRunningState,
+                        'new_state' => $executingCompleteRunningRunningState,
+                    ],
+                    [
+                        'previous_state' => $executingCompleteRunningRunningState,
+                        'new_state' => $completingEventDeliveryCompleteCompleteRunningState,
+                    ],
+                    [
+                        'previous_state' => $completingEventDeliveryCompleteCompleteRunningState,
+                        'new_state' => $completeCompleteCompleteCompleteState,
+                    ],
+                ],
+            ],
+            'events' => [
+                'notifications' => self::getEventNotifications(),
+                'expected' => [
                     [
                         'job' => self::JOB_LABEL,
                         'sequence_number' => 1,
@@ -272,10 +299,6 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                     ],
                     [
-                        'previous_state' => $compilingRunningAwaitingRunningState,
-                        'new_state' => $executingCompleteAwaitingRunningState,
-                    ],
-                    [
                         'job' => self::JOB_LABEL,
                         'sequence_number' => 5,
                         'type' => 'lifecycle/compilation-completed',
@@ -321,10 +344,6 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                     ],
                     [
-                        'previous_state' => $executingCompleteAwaitingRunningState,
-                        'new_state' => $executingCompleteRunningRunningState,
-                    ],
-                    [
                         'job' => self::JOB_LABEL,
                         'sequence_number' => 8,
                         'type' => 'step/passed',
@@ -348,10 +367,6 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                         'label' => 'verify page is open',
                         'reference'=> md5(self::JOB_LABEL . 'test.yml' . 'verify page is open'),
-                    ],
-                    [
-                        'previous_state' => $executingCompleteRunningRunningState,
-                        'new_state' => $completingEventDeliveryCompleteCompleteRunningState,
                     ],
                     [
                         'job' => self::JOB_LABEL,
@@ -401,10 +416,6 @@ class CallbackReceiverLogTest extends TestCase
                         ],
                         'label' => self::JOB_LABEL,
                         'reference' => md5(self::JOB_LABEL),
-                    ],
-                    [
-                        'previous_state' => $completingEventDeliveryCompleteCompleteRunningState,
-                        'new_state' => $completeCompleteCompleteCompleteState,
                     ],
                 ],
             ],
@@ -464,9 +475,41 @@ class CallbackReceiverLogTest extends TestCase
         return (string) json_encode(
             [
                 'notification_count' => count(self::$logSections),
-                'notification_bodies' => self::$loggedNotifications,
+                'notification_bodies' => self::$notifications,
             ],
             JSON_PRETTY_PRINT,
         );
+    }
+
+    /**
+     * @return array<array<mixed>>
+     */
+    private static function getStateChangeNotifications(): array
+    {
+        return self::filterNotificationsByExistentKey('previous_state');
+    }
+
+    /**
+     * @return array<array<mixed>>
+     */
+    private static function getEventNotifications(): array
+    {
+        return self::filterNotificationsByExistentKey('job');
+    }
+
+    /**
+     * @return array<array<mixed>>
+     */
+    private static function filterNotificationsByExistentKey(string $key): array
+    {
+        $notifications = [];
+
+        foreach (self::$notifications as $loggedNotification) {
+            if (array_key_exists($key, $loggedNotification)) {
+                $notifications[] = $loggedNotification;
+            }
+        }
+
+        return $notifications;
     }
 }
