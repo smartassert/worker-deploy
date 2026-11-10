@@ -14,46 +14,57 @@ class CallbackReceiverLogTest extends TestCase
      * @var array<array<mixed>>
      */
     private static array $logSections = [];
+    private static array $loggedNotifications = [];
 
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
 
         self::$logSections = self::extractLogSections((string) stream_get_contents(STDIN));
+
+        $loggedNotifications = [];
+        foreach (self::$logSections as $logSection) {
+            $loggedNotifications[] = self::decodeLoggedNotification($logSection);
+        }
+
+        self::$loggedNotifications = $loggedNotifications;
     }
 
     public function testLogSize(): void
     {
-        self::assertCount(11, self::$logSections);
+        self::assertCount(11, self::$logSections, self::renderLogAssertionFailureMessage());
     }
 
     /**
-     * @dataProvider logBodyDataProvider
+     * @dataProvider loggedNotificationDataProvider
      *
-     * @param array<mixed> $expectedLogSectionBodies
+     * @param array<mixed> $expectedLoggedNotifications
      */
-    public function testLogBody(array $expectedLogSectionBodies): void
+    public function testLoggedNotifications(array $expectedLoggedNotifications): void
     {
-        $logSectionBodyDataCollection = [];
-        foreach (self::$logSections as $logSection) {
-            $logSectionBodyDataCollection[] = $this->decodeLogSectionBody($logSection);
-        }
+        self::assertCount(
+            count(self::$logSections),
+            $expectedLoggedNotifications,
+            self::renderLogAssertionFailureMessage(),
+        );
 
-        self::assertCount(count(self::$logSections), $expectedLogSectionBodies);
-
-        foreach ($expectedLogSectionBodies as $expectedLogSection) {
-            self::assertContains($expectedLogSection, $logSectionBodyDataCollection);
+        foreach ($expectedLoggedNotifications as $expectedLoggedNotification) {
+            self::assertContains(
+                $expectedLoggedNotification,
+                self::$loggedNotifications,
+                self::renderLogAssertionFailureMessage(),
+            );
         }
     }
 
     /**
      * @return array<mixed>
      */
-    public function logBodyDataProvider(): array
+    public function loggedNotificationDataProvider(): array
     {
         return [
             'default' => [
-                'expectedLogSectionBodies' => [
+                'expectedLoggedNotifications' => [
                     [
                         'job' => self::JOB_LABEL,
                         'sequence_number' => 1,
@@ -233,7 +244,7 @@ class CallbackReceiverLogTest extends TestCase
      *
      * @return array<mixed>
      */
-    private function decodeLogSectionBody(array $logSection): array
+    private static function decodeLoggedNotification(array $logSection): array
     {
         $bodyContent = $logSection['body'];
         $bodyData = json_decode($bodyContent, true);
@@ -274,5 +285,16 @@ class CallbackReceiverLogTest extends TestCase
         array_pop($lines);
 
         return implode("\n", $lines);
+    }
+
+    private static function renderLogAssertionFailureMessage(): string
+    {
+        return (string) json_encode(
+            [
+                'notification_count' => count(self::$logSections),
+                'notification_bodies' => self::$loggedNotifications,
+            ],
+            JSON_PRETTY_PRINT,
+        );
     }
 }
