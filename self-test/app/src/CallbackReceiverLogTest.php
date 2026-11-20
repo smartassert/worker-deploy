@@ -514,7 +514,7 @@ class CallbackReceiverLogTest extends TestCase
      */
     private static function getEventNotifications(): array
     {
-        return self::filterNotificationsByExistentKey('job');
+        return self::filterNotificationsByExistentKey('sequence_number');
     }
 
     /**
