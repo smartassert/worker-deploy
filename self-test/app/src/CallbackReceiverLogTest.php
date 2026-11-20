@@ -186,13 +186,6 @@ class CallbackReceiverLogTest extends TestCase
             ],
         ];
 
-        $awaitingRunningAwaitingAwaitingState = [
-            'application' => $applicationAwaitingState,
-            'compilation' => $componentRunningState,
-            'execution' => $componentAwaitingState,
-            'event_delivery' => $componentAwaitingState,
-        ];
-
         $compilingRunningAwaitingAwaitingState = [
             'application' => $applicationCompilingState,
             'compilation' => $componentRunningState,
@@ -239,28 +232,28 @@ class CallbackReceiverLogTest extends TestCase
             'default' => [
                 'expected' => [
                     [
-                        'previous_state' => $awaitingRunningAwaitingAwaitingState,
-                        'new_state' => $compilingRunningAwaitingAwaitingState,
+                        'job' => self::JOB_LABEL,
+                        'state' => $compilingRunningAwaitingAwaitingState,
                     ],
                     [
-                        'previous_state' => $compilingRunningAwaitingAwaitingState,
-                        'new_state' => $compilingRunningAwaitingRunningState,
+                        'job' => self::JOB_LABEL,
+                        'state' => $compilingRunningAwaitingRunningState,
                     ],
                     [
-                        'previous_state' => $compilingRunningAwaitingRunningState,
-                        'new_state' => $executingCompleteAwaitingRunningState,
+                        'job' => self::JOB_LABEL,
+                        'state' => $executingCompleteAwaitingRunningState,
                     ],
                     [
-                        'previous_state' => $executingCompleteAwaitingRunningState,
-                        'new_state' => $executingCompleteRunningRunningState,
+                        'job' => self::JOB_LABEL,
+                        'state' => $executingCompleteRunningRunningState,
                     ],
                     [
-                        'previous_state' => $executingCompleteRunningRunningState,
-                        'new_state' => $completingEventDeliveryCompleteCompleteRunningState,
+                        'job' => self::JOB_LABEL,
+                        'state' => $completingEventDeliveryCompleteCompleteRunningState,
                     ],
                     [
-                        'previous_state' => $completingEventDeliveryCompleteCompleteRunningState,
-                        'new_state' => $completeCompleteCompleteCompleteState,
+                        'job' => self::JOB_LABEL,
+                        'state' => $completeCompleteCompleteCompleteState,
                     ],
                 ],
             ],
