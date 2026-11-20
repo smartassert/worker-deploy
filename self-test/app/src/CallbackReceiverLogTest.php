@@ -506,7 +506,7 @@ class CallbackReceiverLogTest extends TestCase
      */
     private static function getStateChangeNotifications(): array
     {
-        return self::filterNotificationsByExistentKey('previous_state');
+        return self::filterNotificationsByExistentKey('state');
     }
 
     /**
